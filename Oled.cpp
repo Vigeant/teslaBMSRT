@@ -19,7 +19,7 @@ void MyOled::init(){
   oled.display();  // Display what's in the buffer (splashscreen)
   //delay(1000);     // Delay 1000 ms
   oled.clear(PAGE); // Clear the buffer.
-  state = FMT1;
+  state = FMT3;
 }
 
 void MyOled::printFormat1(){
@@ -70,19 +70,44 @@ void MyOled::printFormat2(){
   oled.display();
 }
 
+void MyOled::printFormat3(){
+  
+  switch(Controller::getState()){
+    case Controller::IDLE:
+      MyOled::printCentre("IDLE", 1);
+      break;
+    case Controller::CHARGING:
+      MyOled::printCentre("CHARGING", 1);
+      break;
+    case Controller::DRIVE:
+      MyOled::printCentre("DRIVE", 1);
+      break;
+    default:
+      MyOled::printCentre("default", 1);
+      break;
+  }
+}
+
 void MyOled::task(){
-  const int stateticks = 50;
+  const int stateticks = 6;
   static int ticks = 0;
   switch (state){
     case FMT1:
-      printFormat1();
+      MyOled::printFormat1();
       if (ticks >= stateticks){
         ticks = 0;
         state = FMT2;
       }
       break;
     case FMT2:
-      printFormat2();
+      MyOled::printFormat2();
+      if (ticks >= stateticks){
+        ticks = 0;
+        state = FMT3;
+      }
+      break;
+    case FMT3:
+      MyOled::printFormat3();
       if (ticks >= stateticks){
         ticks = 0;
         state = FMT1;
@@ -93,4 +118,25 @@ void MyOled::task(){
   }
   ticks++;
   
+}
+
+// Center and print a small title
+// This function is quick and dirty. Only works for titles one
+// line long.
+void MyOled::printCentre(const char* value, int font)
+{
+  int middleX = oled.getLCDWidth() / 2;
+  int middleY = oled.getLCDHeight() / 2;
+
+  oled.clear(PAGE);
+  oled.setFontType(font);
+  // Try to set the cursor in the middle of the screen
+  oled.setCursor(middleX - (oled.getFontWidth() * (strlen(value) / 2)),
+                 middleY - (oled.getFontHeight() / 2));
+  // Print the title:
+  oled.print(value);
+  //Logger::debug("%s | %d\n", value, strlen(value));
+  //oled.print("VALUE");
+  oled.display();
+  //oled.clear(PAGE);
 }
