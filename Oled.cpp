@@ -1,4 +1,5 @@
 #include "Oled.h"
+#include "Logger.hpp"
 
 //auto idleString = String("IDLE");
 ///////////////////////////////////
@@ -12,9 +13,8 @@
 #define PIN_MOSI  11
 
 static TeensyView oled(PIN_RESET, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
-Oled::formatState Oled::state;
 
-void Oled::init(){
+Oled::Oled(){
   oled.begin();    // Initialize the OLED
   oled.clear(ALL); // Clear the display's internal memory
   oled.display();  // Display what's in the buffer (splashscreen)
@@ -88,7 +88,7 @@ void Oled::printFormat3(){
   }
 }
 
-void Oled::task(){
+void Oled::doOled(){
   const int stateticks = 6;
   static int ticks = 0;
   switch (state){
@@ -123,6 +123,7 @@ void Oled::task(){
 // Center and print a small values string
 // This function is quick and dirty. Only works for titles one
 // line long.
+
 void Oled::printCentre(const char* value, int font)
 {
   int middleX = oled.getLCDWidth() / 2;
@@ -137,17 +138,23 @@ void Oled::printCentre(const char* value, int font)
   oled.print(value);
   oled.display();
 }
-/*
+
 // Center and print a small values string
 // This function is quick and dirty. Only works for titles one
 // line long.
-void Oled::printCentre(const String value, int font)
+/*
+void Oled::printCentre(String value, int font)
 {
   int middleX = oled.getLCDWidth() / 2;
   int middleY = oled.getLCDHeight() / 2;
 
   oled.clear(PAGE);
   oled.setFontType(font);
+  LOG_DEBUG("the state@ 0x%x\n", &value);
+  LOG_DEBUG("the state: %s\n", (char*)&value);
+  LOG_DEBUG("the state[0]: 0x%x\n", *(unsigned int*)&value);
+  LOG_DEBUG("the state[1]: 0x%x\n", ((unsigned int*)&value)[1]);
+  LOG_DEBUG("the state[2]: 0x%x\n", ((unsigned int*)&value)[2]);
   // Try to set the cursor in the middle of the screen
   oled.setCursor(middleX - (oled.getFontWidth() * (value.length() / 2)),
                  middleY - (oled.getFontHeight() / 2));

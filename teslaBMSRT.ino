@@ -39,7 +39,8 @@ static THD_FUNCTION(ConsoleTask, arg) {
 // Period = 900 ms
 static unsigned int OledTaskPriority = 10;
 //------------------------------------------------------------------------------
-static THD_WORKING_AREA(waOledTask, 256);
+static Oled oled_inst;
+static THD_WORKING_AREA(waOledTask, 1024);
 static THD_FUNCTION(OledTask, arg) {
   (void)arg;
   
@@ -48,7 +49,7 @@ static THD_FUNCTION(OledTask, arg) {
   {
     wakeTime += MS2ST(900);
     chThdSleepUntil(wakeTime);
-    Oled::task();
+    oled_inst.doOled();
   }
 }
 
@@ -129,9 +130,7 @@ void chSetup() {
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  //Console::init();
-
-  Oled::init();
+  //Oled::init();
   Controller::init();
   
   chBegin(chSetup);
