@@ -188,12 +188,12 @@ void Logger::log(LogLevel level, const char *format, va_list args) {
     chMtxUnlock(&serial_MTX);
 }
 
-/*
-void Logger::logMessage(char *format, va_list args) {
+
+void Logger::logMessage(const char *format, va_list args) {
   char buf[128]; // resulting string limited to 128 chars
   vsnprintf(buf, 128, format, args);
   SERIALCONSOLE.print(buf);
-}*/
+}
 
 /*
    Output a log message (called by log(), console())
@@ -213,7 +213,7 @@ void Logger::logMessage(char *format, va_list args) {
    %t - prints the next parameter as boolean ('T' or 'F')
    %T - prints the next parameter as boolean ('true' or 'false')
 */
-
+/*
 void Logger::logMessage(const char *format, va_list args) {
   for (; *format != 0; ++format) {
     if (*format == '%') {
@@ -290,3 +290,4 @@ void Logger::logMessage(const char *format, va_list args) {
   }
   //SERIALCONSOLE.println();
 }
+*/
