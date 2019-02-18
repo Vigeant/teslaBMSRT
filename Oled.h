@@ -7,7 +7,7 @@
 class Oled {
 public:
 
-  Oled();
+  Oled(Controller*);
   void doOled();
   //static void init();
 
@@ -16,6 +16,7 @@ private:
       FMT1 = 0, FMT2 = 1, FMT3 = 2
   };
   formatState state;
+  Controller* controller_inst_ptr;
   void printFormat1();
   void printFormat2();
   void printFormat3();

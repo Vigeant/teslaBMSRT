@@ -14,13 +14,14 @@
 
 static TeensyView oled(PIN_RESET, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
 
-Oled::Oled(){
+Oled::Oled(Controller* cont_inst_ptr){
   oled.begin();    // Initialize the OLED
   oled.clear(ALL); // Clear the display's internal memory
   oled.display();  // Display what's in the buffer (splashscreen)
   //delay(1000);     // Delay 1000 ms
   oled.clear(PAGE); // Clear the buffer.
   state = FMT3;
+  controller_inst_ptr = cont_inst_ptr;
 }
 
 void Oled::printFormat1(){
@@ -72,7 +73,7 @@ void Oled::printFormat2(){
 }
 
 void Oled::printFormat3(){
-  switch(Controller::getState()){
+  switch(controller_inst_ptr->getState()){
     case Controller::IDLE:
       Oled::printCentre("IDLE", 1);
       break;

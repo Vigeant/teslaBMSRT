@@ -33,13 +33,34 @@ static THD_FUNCTION(ConsoleTask, arg) {
 }
 
 //------------------------------------------------------------------------------
+// ControllerTask
+//
+// Runs the BMS state machine controlling all usefull activities
+// Period = 1000 ms
+static unsigned int ControllerTaskPriority = 5;
+//------------------------------------------------------------------------------
+static Controller controller_inst;
+static THD_WORKING_AREA(waControllerTask, 256);
+static THD_FUNCTION(ControllerTask, arg) {
+  (void)arg;
+  
+  systime_t wakeTime = chVTGetSystemTime();
+  for (;;) // A Task shall never return or exit.
+  {
+    wakeTime += MS2ST(1000);
+    chThdSleepUntil(wakeTime);
+    controller_inst.doController();
+  }
+}
+
+//------------------------------------------------------------------------------
 // OledTask
 //
 // Runs the Oled task that simply prints values on the OLED for prod
 // Period = 900 ms
 static unsigned int OledTaskPriority = 10;
 //------------------------------------------------------------------------------
-static Oled oled_inst;
+static Oled oled_inst(&controller_inst);
 static THD_WORKING_AREA(waOledTask, 1024);
 static THD_FUNCTION(OledTask, arg) {
   (void)arg;
@@ -50,26 +71,6 @@ static THD_FUNCTION(OledTask, arg) {
     wakeTime += MS2ST(900);
     chThdSleepUntil(wakeTime);
     oled_inst.doOled();
-  }
-}
-
-//------------------------------------------------------------------------------
-// ControllerTask
-//
-// Runs the BMS state machine controlling all usefull activities
-// Period = 1000 ms
-static unsigned int ControllerTaskPriority = 5;
-//------------------------------------------------------------------------------
-static THD_WORKING_AREA(waControllerTask, 256);
-static THD_FUNCTION(ControllerTask, arg) {
-  (void)arg;
-  
-  systime_t wakeTime = chVTGetSystemTime();
-  for (;;) // A Task shall never return or exit.
-  {
-    wakeTime += MS2ST(1000);
-    chThdSleepUntil(wakeTime);
-    Controller::task();
   }
 }
 
@@ -95,8 +96,6 @@ static THD_FUNCTION(DebugTask, arg) {
     // Sleep for one second.
     wakeTime += MS2ST(2000);
     chThdSleepUntil(wakeTime);
-
-    //LOG_INFO("debug task running, log_inst@: , loglevel: %d\n", &log_inst, log_inst.getLogLevel());
 
     LOG_DEBUG("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));
     LOG_DEBUG("OledTask    | unsused stack | %d\n", chUnusedThreadStack(waOledTask, sizeof(waOledTask)));
@@ -130,8 +129,7 @@ void chSetup() {
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  //Oled::init();
-  Controller::init();
+  //Controller::init();
   
   chBegin(chSetup);
   // chBegin() resets stacks and should never return.

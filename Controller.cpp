@@ -1,13 +1,13 @@
 #include "Controller.h"
 
-Controller::ControllerState Controller::state;
+//Controller::ControllerState Controller::state;
 
 //------------------------------------------------------------------------------
 // Controller::task()
 //
 // Orchestrates the activities within the BMS via a state machine.
 //------------------------------------------------------------------------------
-void Controller::task(){
+void Controller::doController(){
   const int stateticks = 1;
   static int ticks = 0;
   Controller::gatherModuleData();
@@ -40,7 +40,7 @@ void Controller::task(){
 }
 
 
-void Controller::init(){
+Controller::Controller(){
   Controller::initBMSManager();
   
   state = IDLE;
