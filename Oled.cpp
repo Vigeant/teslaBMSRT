@@ -12,9 +12,9 @@
 #define PIN_MOSI  11
 
 static TeensyView oled(PIN_RESET, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
-MyOled::formatState MyOled::state;
+Oled::formatState Oled::state;
 
-void MyOled::init(){
+void Oled::init(){
   oled.begin();    // Initialize the OLED
   oled.clear(ALL); // Clear the display's internal memory
   oled.display();  // Display what's in the buffer (splashscreen)
@@ -23,7 +23,7 @@ void MyOled::init(){
   state = FMT3;
 }
 
-void MyOled::printFormat1(){
+void Oled::printFormat1(){
   const int row0 = 0;
   const int row1 = 42;
   const int row2 = 85;
@@ -47,7 +47,7 @@ void MyOled::printFormat1(){
   oled.display();
 }
 
-void MyOled::printFormat2(){
+void Oled::printFormat2(){
   int row0 = 0;
   int row1 = 42;
   int row2 = 85;
@@ -71,43 +71,43 @@ void MyOled::printFormat2(){
   oled.display();
 }
 
-void MyOled::printFormat3(){
+void Oled::printFormat3(){
   switch(Controller::getState()){
     case Controller::IDLE:
-      MyOled::printCentre("IDLE", 1);
+      Oled::printCentre("IDLE", 1);
       break;
     case Controller::CHARGING:
-      MyOled::printCentre("CHARGING", 1);
+      Oled::printCentre("CHARGING", 1);
       break;
     case Controller::DRIVE:
-      MyOled::printCentre("DRIVE", 1);
+      Oled::printCentre("DRIVE", 1);
       break;
     default:
-      MyOled::printCentre("default", 1);
+      Oled::printCentre("default", 1);
       break;
   }
 }
 
-void MyOled::task(){
+void Oled::task(){
   const int stateticks = 6;
   static int ticks = 0;
   switch (state){
     case FMT1:
-      MyOled::printFormat1();
+      Oled::printFormat1();
       if (ticks >= stateticks){
         ticks = 0;
         state = FMT2;
       }
       break;
     case FMT2:
-      MyOled::printFormat2();
+      Oled::printFormat2();
       if (ticks >= stateticks){
         ticks = 0;
         state = FMT3;
       }
       break;
     case FMT3:
-      MyOled::printFormat3();
+      Oled::printFormat3();
       if (ticks >= stateticks){
         ticks = 0;
         state = FMT1;
@@ -123,7 +123,7 @@ void MyOled::task(){
 // Center and print a small values string
 // This function is quick and dirty. Only works for titles one
 // line long.
-void MyOled::printCentre(const char* value, int font)
+void Oled::printCentre(const char* value, int font)
 {
   int middleX = oled.getLCDWidth() / 2;
   int middleY = oled.getLCDHeight() / 2;
@@ -141,7 +141,7 @@ void MyOled::printCentre(const char* value, int font)
 // Center and print a small values string
 // This function is quick and dirty. Only works for titles one
 // line long.
-void MyOled::printCentre(const String value, int font)
+void Oled::printCentre(const String value, int font)
 {
   int middleX = oled.getLCDWidth() / 2;
   int middleY = oled.getLCDHeight() / 2;

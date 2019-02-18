@@ -1,6 +1,6 @@
 #include <ChRt.h>
 
-#include "Console.h"
+#include "Cons.hpp"
 #include "Logger.hpp"
 #include "Oled.h"
 #include "Controller.h"
@@ -13,12 +13,23 @@
 //
 // Runs the console UI mainly for debugging and later for config
 // Period = 50 ms
-static unsigned int consoleTaskPriority = 25;
 //------------------------------------------------------------------------------
+static unsigned int consoleTaskPriority = 25;
+//instantiate the console
+static Cons cons_inst;
 static THD_WORKING_AREA(waConsoleTask, 1024);
 static THD_FUNCTION(ConsoleTask, arg) {
   (void)arg;
-  Console::task();
+  cons_inst.printMenu();
+  LOG_CONSOLE(">> ");
+  for (;;)
+  {
+    //wakeTime += MS2ST(50);
+    //chThdSleepUntil(wakeTime);
+    chThdSleepMilliseconds(35); // + 15 of the Cons timeout
+    //LOG_CONSOLE("aaa\n");
+    cons_inst.doConsole();
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -37,7 +48,7 @@ static THD_FUNCTION(OledTask, arg) {
   {
     wakeTime += MS2ST(900);
     chThdSleepUntil(wakeTime);
-    MyOled::task();
+    Oled::task();
   }
 }
 
@@ -84,6 +95,8 @@ static THD_FUNCTION(DebugTask, arg) {
     wakeTime += MS2ST(2000);
     chThdSleepUntil(wakeTime);
 
+    //LOG_INFO("debug task running, log_inst@: , loglevel: %d\n", &log_inst, log_inst.getLogLevel());
+
     LOG_DEBUG("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));
     LOG_DEBUG("OledTask    | unsused stack | %d\n", chUnusedThreadStack(waOledTask, sizeof(waOledTask)));
     LOG_DEBUG("ControllerTa| unsused stack | %d\n", chUnusedThreadStack(waControllerTask, sizeof(waControllerTask)));
@@ -116,8 +129,9 @@ void chSetup() {
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  Console::init();
-  MyOled::init();
+  //Console::init();
+
+  Oled::init();
   Controller::init();
   
   chBegin(chSetup);

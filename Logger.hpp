@@ -23,14 +23,12 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  */
+#ifndef LOGGER_HPP_
+#define LOGGER_HPP_
 #include "Log.hpp"
-#ifndef LOGGER_H_
-#define LOGGER_H_
 
-
-
-//instantiate the logger
-static Logger log_inst;
+//export the logger
+extern Logger log_inst;
 
 #define LOG_DEBUG log_inst.debug
 #define LOG_INFO log_inst.info
@@ -39,4 +37,4 @@ static Logger log_inst;
 #define LOG_CONSOLE log_inst.console
 //#define LOG_CONSOLE SERIALCONSOLE.print
 
-#endif /* LOGGER2_H_ */
+#endif /* LOGGER_HPP_ */

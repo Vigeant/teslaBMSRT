@@ -4,7 +4,7 @@
 #include "Controller.h"
 #include <TeensyView.h>  // Include the SFE_TeensyView library
 
-class MyOled {
+class Oled {
 public:
   
   static void task();

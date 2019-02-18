@@ -1,23 +1,9 @@
-#include "Console.h"
+#include "Cons.hpp"
 #include "CONFIG.h"
 #include <stdio.h>
 #include <stdarg.h>
 
-void Console::task(){// This is a Task.
-
-  Console::printMenu();
-  LOG_CONSOLE(">> ");
-  for (;;)
-  {
-    //wakeTime += MS2ST(50);
-    //chThdSleepUntil(wakeTime);
-    chThdSleepMilliseconds(35); // + 15 of the console timeout
-    //LOG_CONSOLE("aaa\n");
-    doConsole();
-  }
-}
-
-void Console::doConsole(){
+void Cons::doConsole(){
   static unsigned char y[32] = {0};
   static unsigned char yptr = 0;
   static unsigned char numB = 0;
@@ -33,6 +19,7 @@ void Console::doConsole(){
           
         case '2':
           LOG_CONSOLE("Option %s\n",y);
+          LOG_INFO("log_inst@: , loglevel: %d\n", &log_inst, log_inst.getLogLevel());
           break;
           
         case 'v':
@@ -50,7 +37,7 @@ void Console::doConsole(){
           
         case 'h':
         case '?':
-          Console::printMenu();
+          printMenu();
           break;
           
         case '\n':
@@ -71,7 +58,7 @@ void Console::doConsole(){
   }   
 }
 
-void Console::printMenu() { 
+void Cons::printMenu() { 
  
     LOG_CONSOLE("\n*************SYSTEM MENU *****************\n");
     LOG_CONSOLE("Enable line endings of some sort (LF, CR, CRLF)\n");
@@ -79,11 +66,11 @@ void Console::printMenu() {
     LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
     LOG_CONSOLE("   h or ? = help (displays this message)\n");
     LOG_CONSOLE("   1 = display stack high watermark for this task\n");
-    LOG_CONSOLE("   vX (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:console)\n");
+    LOG_CONSOLE("   vX (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:Cons)\n");
     LOG_CONSOLE("\n");
 }
 
-void Console::init(){
+Cons::Cons(){
   // initialize serial communication at 9600 bits per second:
   SERIALCONSOLE.begin(9600);
 
