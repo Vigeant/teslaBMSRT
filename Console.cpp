@@ -37,7 +37,7 @@ void Console::doConsole(){
           
         case 'v':
           if (y[1] >= 0x30 && y[1] <= 0x35){
-            log_inst.setLoglevel((Logger2::LogLevel)(y[1] - 0x30));
+            log_inst.setLoglevel((Logger::LogLevel)(y[1] - 0x30));
             LOG_DEBUG("logLevel set to :%d\n", log_inst.getLogLevel());
             LOG_INFO("logLevel set to :%d\n", log_inst.getLogLevel());
             LOG_WARN("logLevel set to :%d\n", log_inst.getLogLevel());

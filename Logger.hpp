@@ -24,13 +24,13 @@
 
  */
 #include "Log.hpp"
-#ifndef LOGGER2_H_
-#define LOGGER2_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 
 
 //instantiate the logger
-static Logger2 log_inst;
+static Logger log_inst;
 
 #define LOG_DEBUG log_inst.debug
 #define LOG_INFO log_inst.info

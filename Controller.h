@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ChRt.h>
 #include "CONFIG.h"
-#include "Logger.h"
 
 #ifndef CONTROLLER_H_
 #define CONTROLLER_H_

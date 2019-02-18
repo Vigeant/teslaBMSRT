@@ -28,9 +28,9 @@
 
 
 
-//Logger2(Logger2::LogLevel loglvl){
-Logger2::Logger2(){
-  logLevel = Logger2::Info;
+//Logger(Logger::LogLevel loglvl){
+Logger::Logger(){
+  logLevel = Logger::Info;
   lastLogTime = 0;
 }
 
@@ -41,7 +41,7 @@ Logger2::Logger2(){
 */
 
 
-void Logger2::debug(const char *message, ...) {
+void Logger::debug(const char *message, ...) {
   if (logLevel > Debug)
     return;
   va_list args;
@@ -54,7 +54,7 @@ void Logger2::debug(const char *message, ...) {
    Output a info message with a variable amount of parameters
    printf() style, see Logger::log()
 */
-void Logger2::info(const char *message, ...) {
+void Logger::info(const char *message, ...) {
   if (logLevel > Info)
     return;
   va_list args;
@@ -67,7 +67,7 @@ void Logger2::info(const char *message, ...) {
    Output a warning message with a variable amount of parameters
    printf() style, see Logger::log()
 */
-void Logger2::warn(const char *message, ...) {
+void Logger::warn(const char *message, ...) {
   if (logLevel > Warn)
     return;
   va_list args;
@@ -80,7 +80,7 @@ void Logger2::warn(const char *message, ...) {
    Output a error message with a variable amount of parameters
    printf() style, see Logger::log()
 */
-void Logger2::error(const char *message, ...) {
+void Logger::error(const char *message, ...) {
   if (logLevel > Error)
     return;
   va_list args;
@@ -93,7 +93,7 @@ void Logger2::error(const char *message, ...) {
    Output a comnsole message with a variable amount of parameters
    printf() style, see Logger::logMessage()
 */
-void Logger2::console(const char *message, ...) {
+void Logger::console(const char *message, ...) {
   //return;
   
   va_list args;
@@ -107,21 +107,21 @@ void Logger2::console(const char *message, ...) {
 /*
    Set the log level. Any output below the specified log level will be omitted.
 */
-void Logger2::setLoglevel(LogLevel level) {
+void Logger::setLoglevel(LogLevel level) {
   logLevel = level;
 }
 
 /*
    Retrieve the current log level.
 */
-Logger2::LogLevel Logger2::getLogLevel() {
+Logger::LogLevel Logger::getLogLevel() {
   return logLevel;
 }
 
 /*
    Return a timestamp when the last log entry was made.
 */
-uint32_t Logger2::getLastLogTime() {
+uint32_t Logger::getLastLogTime() {
   return lastLogTime;
 }
 
@@ -135,7 +135,7 @@ uint32_t Logger2::getLastLogTime() {
       Logger::debug("current time: %d", millis());
    }
 */
-boolean Logger2::isDebug() {
+boolean Logger::isDebug() {
   return logLevel == Debug;
 }
 
@@ -157,7 +157,7 @@ boolean Logger2::isDebug() {
    %t - prints the next parameter as boolean ('T' or 'F')
    %T - prints the next parameter as boolean ('true' or 'false')
 */
-void Logger2::log(LogLevel level, const char *format, va_list args) {
+void Logger::log(LogLevel level, const char *format, va_list args) {
   chMtxLock(&serial_MTX);
   
     if (level < Cons){
@@ -213,7 +213,7 @@ void Logger::logMessage(char *format, va_list args) {
    %T - prints the next parameter as boolean ('true' or 'false')
 */
 
-void Logger2::logMessage(const char *format, va_list args) {
+void Logger::logMessage(const char *format, va_list args) {
   for (; *format != 0; ++format) {
     if (*format == '%') {
       ++format;

@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ChRt.h>
 #include "CONFIG.h"
-#include "Logger.h"
 #include "Controller.h"
 #include <TeensyView.h>  // Include the SFE_TeensyView library
 

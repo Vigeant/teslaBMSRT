@@ -1,7 +1,7 @@
 #include <ChRt.h>
 
 #include "Console.h"
-#include "Logger2.hpp"
+#include "Logger.hpp"
 #include "Oled.h"
 #include "Controller.h"
 

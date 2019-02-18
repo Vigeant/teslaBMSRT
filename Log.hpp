@@ -6,13 +6,12 @@
 #include "CONFIG.h"
 
 
-class Logger2 {
+class Logger {
 public:
     enum LogLevel {
         Debug = 0, Info = 1, Warn = 2, Error = 3, Off = 4, Cons = 5
     };
-    //Logger2(LogLevel);
-    Logger2();
+    Logger();
     void debug(const char *, ...);
     void info(const char *, ...);
     void warn(const char *, ...);
