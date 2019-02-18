@@ -21,5 +21,6 @@ private:
   static void printFormat3();
 
   static void printCentre(const char*  , int);
+  //static void printCentre(String  , int);
 
 };

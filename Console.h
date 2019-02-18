@@ -1,5 +1,6 @@
 #include <ChRt.h>
 #include "Logger.h"
+#include "Logger2.hpp"
 
 
 class Console {

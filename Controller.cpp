@@ -2,9 +2,15 @@
 
 Controller::ControllerState Controller::state;
 
+//------------------------------------------------------------------------------
+// Controller::task()
+//
+// Orchestrates the activities within the BMS via a state machine.
+//------------------------------------------------------------------------------
 void Controller::task(){
-  const int stateticks = 10;
+  const int stateticks = 1;
   static int ticks = 0;
+  Controller::gatherModuleData();
   switch (state){
     case IDLE:
       Controller::idle();
@@ -33,9 +39,30 @@ void Controller::task(){
   ticks++;
 }
 
+
 void Controller::init(){
+  Controller::initBMSManager();
+  
   state = IDLE;
 }
+
+//initialization functions
+//reset all boards and assign address to each board and configure their thresholds
+void Controller::initBMSManager(){
+  
+}
+
+//run-time functions
+//gathers all the data from the boards and populates the BMSModel
+void Controller::gatherModuleData(){
+  
+}
+//balances the cells according to thresholds in the CONFIG.h file
+void Controller::balanceCells(){
+  
+}
+
+
 
 void Controller::idle(){
   

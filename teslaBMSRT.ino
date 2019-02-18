@@ -1,7 +1,7 @@
 #include <ChRt.h>
 
 #include "Console.h"
-#include "Logger.h"
+#include "Logger2.hpp"
 #include "Oled.h"
 #include "Controller.h"
 
@@ -15,7 +15,7 @@
 // Period = 50 ms
 static unsigned int consoleTaskPriority = 25;
 //------------------------------------------------------------------------------
-static THD_WORKING_AREA(waConsoleTask, 256);
+static THD_WORKING_AREA(waConsoleTask, 1024);
 static THD_FUNCTION(ConsoleTask, arg) {
   (void)arg;
   Console::task();
@@ -84,11 +84,11 @@ static THD_FUNCTION(DebugTask, arg) {
     wakeTime += MS2ST(2000);
     chThdSleepUntil(wakeTime);
 
-    Logger::debug("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));
-    Logger::debug("OledTask    | unsused stack | %d\n", chUnusedThreadStack(waOledTask, sizeof(waOledTask)));
-    Logger::debug("ControllerTa| unsused stack | %d\n", chUnusedThreadStack(waControllerTask, sizeof(waControllerTask)));
-    Logger::debug("ConsoleTask | unsused stack | %d\n", chUnusedThreadStack(waConsoleTask, sizeof(waConsoleTask)));
-    Logger::debug("==================================\n", 1);
+    LOG_DEBUG("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));
+    LOG_DEBUG("OledTask    | unsused stack | %d\n", chUnusedThreadStack(waOledTask, sizeof(waOledTask)));
+    LOG_DEBUG("ControllerTa| unsused stack | %d\n", chUnusedThreadStack(waControllerTask, sizeof(waControllerTask)));
+    LOG_DEBUG("ConsoleTask | unsused stack | %d\n", chUnusedThreadStack(waConsoleTask, sizeof(waConsoleTask)));
+    LOG_DEBUG("==================================\n", 1);
   }
 }
 
@@ -103,14 +103,13 @@ void chSetup() {
 
   chThdCreateStatic(waDebugTask, sizeof(waDebugTask),
                           NORMALPRIO + DebugTaskPriority, DebugTask, NULL);
-                          
+                         
   chThdCreateStatic(waOledTask, sizeof(waOledTask),
                           NORMALPRIO + OledTaskPriority, OledTask, NULL);
 
   chThdCreateStatic(waControllerTask, sizeof(waControllerTask),
                           NORMALPRIO + ControllerTaskPriority, ControllerTask, NULL);
-                          
-
+                         
   chThdCreateStatic(waConsoleTask, sizeof(waConsoleTask),
                           NORMALPRIO + consoleTaskPriority, ConsoleTask, NULL); 
 }

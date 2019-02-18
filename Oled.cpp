@@ -1,5 +1,7 @@
 #include "Oled.h"
+#include "Logger.h"
 
+//auto idleString = String("IDLE");
 ///////////////////////////////////
 // TeensyView Object Declaration //
 ///////////////////////////////////
@@ -71,7 +73,6 @@ void MyOled::printFormat2(){
 }
 
 void MyOled::printFormat3(){
-  
   switch(Controller::getState()){
     case Controller::IDLE:
       MyOled::printCentre("IDLE", 1);
@@ -120,7 +121,7 @@ void MyOled::task(){
   
 }
 
-// Center and print a small title
+// Center and print a small values string
 // This function is quick and dirty. Only works for titles one
 // line long.
 void MyOled::printCentre(const char* value, int font)
@@ -135,8 +136,23 @@ void MyOled::printCentre(const char* value, int font)
                  middleY - (oled.getFontHeight() / 2));
   // Print the title:
   oled.print(value);
-  //Logger::debug("%s | %d\n", value, strlen(value));
-  //oled.print("VALUE");
   oled.display();
-  //oled.clear(PAGE);
 }
+/*
+// Center and print a small values string
+// This function is quick and dirty. Only works for titles one
+// line long.
+void MyOled::printCentre(const String value, int font)
+{
+  int middleX = oled.getLCDWidth() / 2;
+  int middleY = oled.getLCDHeight() / 2;
+
+  oled.clear(PAGE);
+  oled.setFontType(font);
+  // Try to set the cursor in the middle of the screen
+  oled.setCursor(middleX - (oled.getFontWidth() * (value.length() / 2)),
+                 middleY - (oled.getFontHeight() / 2));
+  // Print the title:
+  oled.print(value);
+  oled.display();
+}*/

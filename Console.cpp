@@ -6,13 +6,13 @@
 void Console::task(){// This is a Task.
 
   Console::printMenu();
-  Logger::console(">> ");
+  LOG_CONSOLE(">> ");
   for (;;)
   {
     //wakeTime += MS2ST(50);
     //chThdSleepUntil(wakeTime);
     chThdSleepMilliseconds(35); // + 15 of the console timeout
-    //Logger::console("aaa\n");
+    //LOG_CONSOLE("aaa\n");
     doConsole();
   }
 }
@@ -23,28 +23,28 @@ void Console::doConsole(){
   static unsigned char numB = 0;
   if (SERIALCONSOLE.available()) { 
     numB = SERIALCONSOLE.readBytesUntil('\n', &y[yptr], 31 - yptr);
-    Logger::console("%s",&y[yptr]);
+    LOG_CONSOLE("%s",&y[yptr]);
     yptr += numB;
     if ((y[yptr-1] == '\n') || (y[yptr-1] == '\r')){
       switch (y[0]){
         case '1':
-          Logger::console("Enable debug mode to see stack usage for all tasks\n");
+          LOG_CONSOLE("Enable debug mode to see stack usage for all tasks\n");
           break;
           
         case '2':
-          Logger::console("Option %s\n",y);
+          LOG_CONSOLE("Option %s\n",y);
           break;
           
         case 'v':
           if (y[1] >= 0x30 && y[1] <= 0x35){
-            Logger::setLoglevel((Logger::LogLevel)(y[1] - 0x30));
-            Logger::debug("logLevel set to :%d\n", Logger::getLogLevel());
-            Logger::info("logLevel set to :%d\n", Logger::getLogLevel());
-            Logger::warn("logLevel set to :%d\n", Logger::getLogLevel());
-            Logger::error("logLevel set to :%d\n", Logger::getLogLevel());
-            Logger::console("logLevel set to :%d\n", Logger::getLogLevel());
+            log_inst.setLoglevel((Logger2::LogLevel)(y[1] - 0x30));
+            LOG_DEBUG("logLevel set to :%d\n", log_inst.getLogLevel());
+            LOG_INFO("logLevel set to :%d\n", log_inst.getLogLevel());
+            LOG_WARN("logLevel set to :%d\n", log_inst.getLogLevel());
+            LOG_ERROR("logLevel set to :%d\n", log_inst.getLogLevel());
+            LOG_CONSOLE("logLevel set to :%d\n", log_inst.getLogLevel());
           } else {
-            Logger::console("logLevel out of bounds (0-5)\n");
+            LOG_CONSOLE("logLevel out of bounds (0-5)\n");
           }
           break;
           
@@ -67,19 +67,20 @@ void Console::doConsole(){
       y[i] = 0;
     }
     yptr = 0;
-    Logger::console(">> ");
+    LOG_CONSOLE(">> ");
   }   
 }
 
-void Console::printMenu() {   
-    Logger::console("\n*************SYSTEM MENU *****************\n");
-    Logger::console("Enable line endings of some sort (LF, CR, CRLF)\n");
-    Logger::console("Most commands case sensitive\n\n");
-    Logger::console("GENERAL SYSTEM CONFIGURATION\n\n");
-    Logger::console("   h or ? = help (displays this message)\n");
-    Logger::console("   1 = display stack high watermark for this task\n");
-    Logger::console("   vX (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:console)\n");
-    Logger::console("\n");
+void Console::printMenu() { 
+ 
+    LOG_CONSOLE("\n*************SYSTEM MENU *****************\n");
+    LOG_CONSOLE("Enable line endings of some sort (LF, CR, CRLF)\n");
+    LOG_CONSOLE("Most commands case sensitive\n\n");
+    LOG_CONSOLE("GENERAL SYSTEM CONFIGURATION\n\n");
+    LOG_CONSOLE("   h or ? = help (displays this message)\n");
+    LOG_CONSOLE("   1 = display stack high watermark for this task\n");
+    LOG_CONSOLE("   vX (X=0:debug, X=1:info, X=2:warn, X=3:error, X=4:console)\n");
+    LOG_CONSOLE("\n");
 }
 
 void Console::init(){

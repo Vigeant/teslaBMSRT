@@ -23,37 +23,20 @@
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  */
-
-#ifndef LOGGER_H_
-#define LOGGER_H_
-
-#include <Arduino.h>
-
-#include <ChRt.h>
-#include "CONFIG.h"
+#include "Log.hpp"
+#ifndef LOGGER2_H_
+#define LOGGER2_H_
 
 
-class Logger {
-public:
-    enum LogLevel {
-        Debug = 0, Info = 1, Warn = 2, Error = 3, Off = 4, Cons = 5
-    };
-    static void debug(const char *, ...);
-    static void info(const char *, ...);
-    static void warn(const char *, ...);
-    static void error(const char *, ...);
-    static void console(const char *, ...);
-    static void setLoglevel(LogLevel);
-    static LogLevel getLogLevel();
-    static uint32_t getLastLogTime();
-    static boolean isDebug();
-private:
-    static LogLevel logLevel;
-    static uint32_t lastLogTime;
-    static mutex_t serialMTX;
 
-    static void log(LogLevel, const char *format, va_list);
-    static void logMessage(const char *format, va_list args);
-};
+//instantiate the logger
+static Logger2 log_inst;
 
-#endif /* LOGGER_H_ */
+#define LOG_DEBUG log_inst.debug
+#define LOG_INFO log_inst.info
+#define LOG_WARN log_inst.warn
+#define LOG_ERROR log_inst.error
+#define LOG_CONSOLE log_inst.console
+//#define LOG_CONSOLE SERIALCONSOLE.print
+
+#endif /* LOGGER2_H_ */

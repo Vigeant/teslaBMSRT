@@ -24,12 +24,15 @@
 
 */
 
-#include "Logger.h"
+#include "Log.hpp"
 
-Logger::LogLevel Logger::logLevel = Logger::Info;
-uint32_t Logger::lastLogTime = 0;
 
-MUTEX_DECL(Logger::serialMTX);
+
+//Logger2(Logger2::LogLevel loglvl){
+Logger2::Logger2(){
+  logLevel = Logger2::Info;
+  lastLogTime = 0;
+}
 
 /*
    Output a debug message with a variable amount of parameters.
@@ -38,12 +41,12 @@ MUTEX_DECL(Logger::serialMTX);
 */
 
 
-void Logger::debug(const char *message, ...) {
+void Logger2::debug(const char *message, ...) {
   if (logLevel > Debug)
     return;
   va_list args;
   va_start(args, message);
-  Logger::log(Debug, message, args);
+  log(Debug, message, args);
   va_end(args);
 }
 
@@ -51,12 +54,12 @@ void Logger::debug(const char *message, ...) {
    Output a info message with a variable amount of parameters
    printf() style, see Logger::log()
 */
-void Logger::info(const char *message, ...) {
+void Logger2::info(const char *message, ...) {
   if (logLevel > Info)
     return;
   va_list args;
   va_start(args, message);
-  Logger::log(Info, message, args);
+  log(Info, message, args);
   va_end(args);
 }
 
@@ -64,12 +67,12 @@ void Logger::info(const char *message, ...) {
    Output a warning message with a variable amount of parameters
    printf() style, see Logger::log()
 */
-void Logger::warn(const char *message, ...) {
+void Logger2::warn(const char *message, ...) {
   if (logLevel > Warn)
     return;
   va_list args;
   va_start(args, message);
-  Logger::log(Warn, message, args);
+  log(Warn, message, args);
   va_end(args);
 }
 
@@ -77,12 +80,12 @@ void Logger::warn(const char *message, ...) {
    Output a error message with a variable amount of parameters
    printf() style, see Logger::log()
 */
-void Logger::error(const char *message, ...) {
+void Logger2::error(const char *message, ...) {
   if (logLevel > Error)
     return;
   va_list args;
   va_start(args, message);
-  Logger::log(Error, message, args);
+  log(Error, message, args);
   va_end(args);
 }
 
@@ -90,10 +93,13 @@ void Logger::error(const char *message, ...) {
    Output a comnsole message with a variable amount of parameters
    printf() style, see Logger::logMessage()
 */
-void Logger::console(const char *message, ...) {
+void Logger2::console(const char *message, ...) {
+  //return;
+  
   va_list args;
   va_start(args, message);
-  Logger::log(Cons, message, args);
+  log(Cons, message, args);
+  
   va_end(args);
 }
 
@@ -101,21 +107,21 @@ void Logger::console(const char *message, ...) {
 /*
    Set the log level. Any output below the specified log level will be omitted.
 */
-void Logger::setLoglevel(LogLevel level) {
+void Logger2::setLoglevel(LogLevel level) {
   logLevel = level;
 }
 
 /*
    Retrieve the current log level.
 */
-Logger::LogLevel Logger::getLogLevel() {
+Logger2::LogLevel Logger2::getLogLevel() {
   return logLevel;
 }
 
 /*
    Return a timestamp when the last log entry was made.
 */
-uint32_t Logger::getLastLogTime() {
+uint32_t Logger2::getLastLogTime() {
   return lastLogTime;
 }
 
@@ -129,7 +135,7 @@ uint32_t Logger::getLastLogTime() {
       Logger::debug("current time: %d", millis());
    }
 */
-boolean Logger::isDebug() {
+boolean Logger2::isDebug() {
   return logLevel == Debug;
 }
 
@@ -151,8 +157,9 @@ boolean Logger::isDebug() {
    %t - prints the next parameter as boolean ('T' or 'F')
    %T - prints the next parameter as boolean ('true' or 'false')
 */
-void Logger::log(LogLevel level, const char *format, va_list args) {
-  chMtxLock(&serialMTX);
+void Logger2::log(LogLevel level, const char *format, va_list args) {
+  chMtxLock(&serial_MTX);
+  
     if (level < Cons){
       lastLogTime = millis();
       SERIALCONSOLE.print(lastLogTime);
@@ -176,9 +183,8 @@ void Logger::log(LogLevel level, const char *format, va_list args) {
       case Cons:
         break;
     }
-  
     logMessage(format, args);
-    chMtxUnlock(&serialMTX);
+    chMtxUnlock(&serial_MTX);
 }
 
 /*
@@ -207,7 +213,7 @@ void Logger::logMessage(char *format, va_list args) {
    %T - prints the next parameter as boolean ('true' or 'false')
 */
 
-void Logger::logMessage(const char *format, va_list args) {
+void Logger2::logMessage(const char *format, va_list args) {
   for (; *format != 0; ++format) {
     if (*format == '%') {
       ++format;
