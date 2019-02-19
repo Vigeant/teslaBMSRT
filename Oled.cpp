@@ -1,7 +1,6 @@
-#include "Oled.h"
+#include "Oled.hpp"
 #include "Logger.hpp"
 
-//auto idleString = String("IDLE");
 ///////////////////////////////////
 // TeensyView Object Declaration //
 ///////////////////////////////////
@@ -124,7 +123,6 @@ void Oled::doOled(){
 // Center and print a small values string
 // This function is quick and dirty. Only works for titles one
 // line long.
-
 void Oled::printCentre(const char* value, int font)
 {
   int middleX = oled.getLCDWidth() / 2;
@@ -139,27 +137,3 @@ void Oled::printCentre(const char* value, int font)
   oled.print(value);
   oled.display();
 }
-
-// Center and print a small values string
-// This function is quick and dirty. Only works for titles one
-// line long.
-/*
-void Oled::printCentre(String value, int font)
-{
-  int middleX = oled.getLCDWidth() / 2;
-  int middleY = oled.getLCDHeight() / 2;
-
-  oled.clear(PAGE);
-  oled.setFontType(font);
-  LOG_DEBUG("the state@ 0x%x\n", &value);
-  LOG_DEBUG("the state: %s\n", (char*)&value);
-  LOG_DEBUG("the state[0]: 0x%x\n", *(unsigned int*)&value);
-  LOG_DEBUG("the state[1]: 0x%x\n", ((unsigned int*)&value)[1]);
-  LOG_DEBUG("the state[2]: 0x%x\n", ((unsigned int*)&value)[2]);
-  // Try to set the cursor in the middle of the screen
-  oled.setCursor(middleX - (oled.getFontWidth() * (value.length() / 2)),
-                 middleY - (oled.getFontHeight() / 2));
-  // Print the title:
-  oled.print(value);
-  oled.display();
-}*/

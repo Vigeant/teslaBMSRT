@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ChRt.h>
 #include "CONFIG.h"
-#include "Controller.h"
+#include "Controller.hpp"
 #include <TeensyView.h>  // Include the SFE_TeensyView library
 
 class Oled {

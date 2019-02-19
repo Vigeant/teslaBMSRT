@@ -6,20 +6,42 @@
 #include "Logger.hpp"
 
 
-#define MAX_PAYLOAD 128
-#define ILLEGAL_READ_LEN -2
-#define READ_CRC_FAIL -3
-#define READ_RECV_MODADDR_MISMATCH -4
-#define READ_RECV_ADDR_MISMATCH -5
-#define READ_RECV_LEN_MISMATCH -6
+
+//instantiate the drive
+BMSDriver bmsdriver_inst;
 
 BMSDriver::BMSDriver() {
   SERIALBMS.begin(612500);
 }
 
+void logError(const uint8_t ma, const int16_t err, const char* message) {
+  switch (err) {
+    case ILLEGAL_READ_LEN:
+      LOG_ERROR("Module %d: ILLEGAL_READ_LEN | %s\n", ma, message);
+      break;
+    case READ_CRC_FAIL:
+      LOG_ERROR("Module %d: READ_CRC_FAIL | %s\n", ma, message);
+      break;
+    case READ_RECV_MODADDR_MISMATCH:
+      LOG_ERROR("Module %d: READ_RECV_MODADDR_MISMATCH | %s\n", ma, message);
+      break;
+    case READ_RECV_ADDR_MISMATCH:
+      LOG_ERROR("Module %d: READ_RECV_ADDR_MISMATCH | %s\n", ma, message);
+      break;
+    case READ_RECV_LEN_MISMATCH:
+      LOG_ERROR("Module %d: READ_RECV_LEN_MISMATCH | %s\n", ma, message);
+      break;
+    default:
+      LOG_ERROR("Module %d: UNKNOWN_ERROR | %s\n", ma, message);
+      break;
+  }
+
+}
+
 int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, const uint8_t readLen, uint8_t* recvBuff ) {
+  uint8_t fixedModAddress = moduleAddress << 1;
   uint8_t byteIndex = 0;
-  uint8_t maxLen = readLen + 3;//[modAddr][readAddr][data][CRC]
+  uint8_t maxLen = readLen + 4;//[modAddr][readAddr][data][CRC]
   uint8_t buff[MAX_PAYLOAD];
 
   //check if the read is larger than our recv buffer
@@ -31,7 +53,7 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
 
   //sending read command on serial port
   LOG_DEBUG("Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
-  SERIALBMS.write(moduleAddress);
+  SERIALBMS.write(fixedModAddress);
   SERIALBMS.write(readAddress);
   SERIALBMS.write(readLen);
 
@@ -57,8 +79,8 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
     return READ_CRC_FAIL;
   }
 
-  //success! remove 3 bytes protocol wrapper around payload
-  memcpy(recvBuff, &buff[2], readLen); //[modAddr][readAddr][data][CRC] -> [data]
+  //success! remove 4 bytes protocol wrapper around payload
+  memcpy(recvBuff, &buff[3], readLen); //[modAddr][readAddr][readLen][data][CRC] -> [data]
   LOG_DEBUG("Received:");
   if (log_inst.getLogLevel() == Logger::Debug) {
     for (int i = 0; i < readLen; i++) {
@@ -72,6 +94,7 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
 
 
 int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress, const uint8_t sendByte) {
+  uint8_t fixedModAddress = moduleAddress << 1;
   uint8_t byteIndex = 0;
   uint8_t maxLen = 4;//[modAddr][readAddr][data][CRC]
   uint8_t sendBuff[4];
@@ -83,7 +106,7 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
 
   //sending read command on serial port
   LOG_DEBUG("Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
-  sendBuff[0] = moduleAddress | 1;
+  sendBuff[0] = fixedModAddress | 1;
   sendBuff[1] = writeAddress;
   sendBuff[2] = sendByte;
   sendBuff[3] = genCRC(sendBuff, 3);

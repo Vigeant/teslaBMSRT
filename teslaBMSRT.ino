@@ -2,8 +2,8 @@
 
 #include "Cons.hpp"
 #include "Logger.hpp"
-#include "Oled.h"
-#include "Controller.h"
+#include "Oled.hpp"
+#include "Controller.hpp"
 
 // define Tasks
 // priority 1 = low, 100 = high

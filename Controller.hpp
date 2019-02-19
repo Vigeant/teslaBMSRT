@@ -2,8 +2,8 @@
 #include <ChRt.h>
 #include "CONFIG.h"
 
-#ifndef CONTROLLER_H_
-#define CONTROLLER_H_
+#ifndef CONTROLLER_HPP_
+#define CONTROLLER_HPP_
 
 class Controller {
 public:

@@ -25,16 +25,34 @@
 #define REG_BAL_TIME        0x33
 #define REG_ADC_CONV        0x34
 #define REG_ADDR_CTRL       0x3B
+#define REG_SETPNTS_CTRL    0x40
 
 #define MAX_MODULE_ADDR     0x3E
+
+#define MAX_PAYLOAD 128
+
+//error codes
+#define ILLEGAL_READ_LEN -2
+#define READ_CRC_FAIL -3
+#define READ_RECV_MODADDR_MISMATCH -4
+#define READ_RECV_ADDR_MISMATCH -5
+#define READ_RECV_LEN_MISMATCH -6
 
 class BMSDriver {
   public:
     BMSDriver();
     int16_t read(const uint8_t moduleAddress, const uint8_t readAddress, const uint8_t readLen, uint8_t* recvBuff);
     int16_t write(const uint8_t moduleAddress, const uint8_t writeAddress, const uint8_t sendByte);
+    void logError(const uint8_t ma, const int16_t err, const char* message);
 
   private:
     uint8_t genCRC(const uint8_t * buf, const uint8_t bufLen);
   
 };
+
+//export the logger
+extern BMSDriver bmsdriver_inst;
+
+#define BMSDR bmsdriver_inst.read
+#define BMSDW bmsdriver_inst.write
+#define BMSD_LOG_ERR bmsdriver_inst.logError
