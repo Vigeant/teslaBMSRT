@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ChRt.h>
 #include "CONFIG.h"
+#include "BMSModuleManager.hpp"
 
 #ifndef CONTROLLER_HPP_
 #define CONTROLLER_HPP_
@@ -15,6 +16,8 @@ public:
   ControllerState getState();
   
 private:
+
+  BMSModuleManager bms;
 
   //initialization functions
   void initBMSManager(); //reset all boards and assign address to each board

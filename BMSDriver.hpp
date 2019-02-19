@@ -29,6 +29,8 @@
 
 #define MAX_MODULE_ADDR     0x3E
 
+#define BROADCAST_ADDR      0x3F
+
 #define MAX_PAYLOAD 128
 
 //error codes
@@ -37,6 +39,8 @@
 #define READ_RECV_MODADDR_MISMATCH -4
 #define READ_RECV_ADDR_MISMATCH -5
 #define READ_RECV_LEN_MISMATCH -6
+#define WRITE_RECV_LEN_MISMATCH -7
+#define WRITE_CRC_FAIL -8
 
 class BMSDriver {
   public:

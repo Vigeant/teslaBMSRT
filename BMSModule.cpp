@@ -2,7 +2,10 @@
 #include "BMSDriver.hpp"
 #include "Logger.hpp"
 
-
+/*
+   It's important for the constructor to be without arguments
+   This allows instantiating all 0x3E modules on the .bss instead of the stack.
+*/
 BMSModule::BMSModule()
 {
   resetRecordedValues();
@@ -10,7 +13,7 @@ BMSModule::BMSModule()
 }
 
 /*
-   This function would be called via the serial port or a switch to reset watermarks
+   This function would be called via the serial console or a switch to reset watermarks
 */
 void BMSModule::resetRecordedValues()
 {
@@ -31,7 +34,26 @@ void BMSModule::resetRecordedValues()
 }
 
 /*
-   This function synchronizes the physical battery mdule with the object instance
+ * Balance function
+ * 5 second balance limit, if not triggered to balance it will stop after 5 seconds
+*/
+bool BMSModule::balanceCells(uint8_t cellMask, uint8_t balanceTime) {
+  int16_t err;
+  //BalanceCells time
+  if ((err = BMSDW(moduleAddress, REG_BAL_TIME, balanceTime)) < 0) {
+    BMSD_LOG_ERR(moduleAddress, err, "BalanceCells time");
+    return false;
+  }
+
+  //write balance state to register
+  if ((err = BMSDW(moduleAddress, REG_BAL_CTRL, cellMask)) < 0) {
+    BMSD_LOG_ERR(moduleAddress, err, "BalanceCells mask");
+    return false;
+  }
+}
+
+/*
+   This function synchronizes the physical battery module with the object instance
 */
 bool BMSModule::updateInstanceWithModuleValues()
 {
@@ -237,13 +259,13 @@ float BMSModule::getTemperature(int temp)
   return temperatures[temp];
 }
 
-void BMSModule::setAddress(int newAddr)
+void BMSModule::setAddress(uint8_t newAddr)
 {
   if (newAddr < 0 || newAddr > MAX_MODULE_ADDR) return;
   moduleAddress = newAddr;
 }
 
-int BMSModule::getAddress()
+uint8_t BMSModule::getAddress()
 {
   return moduleAddress;
 }

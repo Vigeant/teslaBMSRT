@@ -1,7 +1,7 @@
-/* 
- * Adapted from the work of Tom Debree
- * https://github.com/tomdebree/TeslaBMSV2/blob/master/BMSUtil.h
- */
+/*
+   Adapted from the work of Tom Debree
+   https://github.com/tomdebree/TeslaBMSV2/blob/master/BMSUtil.h
+*/
 #include "BMSDriver.hpp"
 #include "Logger.hpp"
 
@@ -31,6 +31,13 @@ void logError(const uint8_t ma, const int16_t err, const char* message) {
     case READ_RECV_LEN_MISMATCH:
       LOG_ERROR("Module %d: READ_RECV_LEN_MISMATCH | %s\n", ma, message);
       break;
+    case WRITE_RECV_LEN_MISMATCH:
+      LOG_ERROR("Module %d: WRITE_RECV_LEN_MISMATCH | %s\n", ma, message);
+      break;
+    case WRITE_CRC_FAIL:
+      LOG_ERROR("Module %d: WRITE_CRC_FAIL | %s\n", ma, message);
+      break;
+
     default:
       LOG_ERROR("Module %d: UNKNOWN_ERROR | %s\n", ma, message);
       break;
@@ -74,7 +81,7 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
   }
 
   //verify the CRC
-  if (genCRC(buff, maxLen - 1) != buff[maxLen - 1]){
+  if (genCRC(buff, maxLen - 1) != buff[maxLen - 1]) {
     LOG_ERROR("READ_CRC_FAIL | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
     return READ_CRC_FAIL;
   }
@@ -125,16 +132,16 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
     while (SERIALBMS.available()) SERIALBMS.read();
   } else {
     LOG_ERROR("READ_RECV_LEN_MISMATCH | Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
-    return READ_RECV_LEN_MISMATCH;
+    return WRITE_RECV_LEN_MISMATCH;
   }
 
   //verify the CRC
-  if (sendBuff[maxLen - 1]!= recvBuff[maxLen - 1]){
+  if (sendBuff[maxLen - 1] != recvBuff[maxLen - 1]) {
     LOG_ERROR("READ_CRC_FAIL | Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
-    return READ_CRC_FAIL;
+    return WRITE_CRC_FAIL;
   }
 
-  //success! remove 3 bytes protocol wrapper around payload
+  //success!
   LOG_DEBUG("Write Successful!\n");
   return byteIndex;
 }

@@ -10,6 +10,7 @@ class BMSModule
     //void readStatus();
     void resetRecordedValues();
     //void stopBalance();
+    bool balanceCells(uint8_t cellMask, uint8_t balanceTime);
     bool updateInstanceWithModuleValues();
     
     //int getscells();
@@ -32,8 +33,8 @@ class BMSModule
     uint8_t getAlerts();
     uint8_t getCOVCells();
     uint8_t getCUVCells();
-    void setAddress(int newAddr);
-    int getAddress();
+    void setAddress(uint8_t newAddr);
+    uint8_t getAddress();
 
     void settempsensor(int tempsensor);
     //void setIgnoreCell(float Ignore);
