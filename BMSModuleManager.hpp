@@ -12,8 +12,6 @@ class BMSModuleManager
     void resetModuleRecordedValues();
     void StopBalancing();
     void balanceCells(uint8_t duration);
-    void setupBoards();
-    void findBoards();
     void renumberBoardIDs();
     void clearFaults();
     void sleepBoards();

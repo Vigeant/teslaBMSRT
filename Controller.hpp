@@ -9,11 +9,12 @@
 class Controller {
 public:
   enum ControllerState {
-      IDLE = 0, CHARGING = 1, DRIVE = 2
+      INIT = 0, IDLE = 1, CHARGING = 2, DRIVE = 3
   };  
   void doController();
   Controller();
   ControllerState getState();
+  BMSModuleManager* getBMSPtr();
   
 private:
 
@@ -23,8 +24,8 @@ private:
   void initBMSManager(); //reset all boards and assign address to each board
 
   //run-time functions
-  void gatherModuleData(); //gathers all the data from the boards and populates the BMSModel
-  void balanceCells(); //balances the cells according to thresholds in the CONFIG.h file
+  void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
+  void balanceCells(); //balances the cells according to thresholds in the BMSModuleManager
    
 
   ControllerState state; 

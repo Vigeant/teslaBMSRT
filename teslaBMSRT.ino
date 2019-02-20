@@ -5,6 +5,13 @@
 #include "Oled.hpp"
 #include "Controller.hpp"
 
+//instantiate the console
+static Controller controller_inst;
+static Cons cons_inst;
+static Oled oled_inst(&controller_inst);
+
+
+
 // define Tasks
 // priority 1 = low, 100 = high
 
@@ -15,8 +22,6 @@
 // Period = 50 ms
 //------------------------------------------------------------------------------
 static unsigned int consoleTaskPriority = 25;
-//instantiate the console
-static Cons cons_inst;
 static THD_WORKING_AREA(waConsoleTask, 2048);
 static THD_FUNCTION(ConsoleTask, arg) {
   (void)arg;
@@ -39,7 +44,6 @@ static THD_FUNCTION(ConsoleTask, arg) {
 // Period = 1000 ms
 static unsigned int ControllerTaskPriority = 5;
 //------------------------------------------------------------------------------
-static Controller controller_inst;
 static THD_WORKING_AREA(waControllerTask, 2048);
 static THD_FUNCTION(ControllerTask, arg) {
   (void)arg;
@@ -60,7 +64,6 @@ static THD_FUNCTION(ControllerTask, arg) {
 // Period = 900 ms
 static unsigned int OledTaskPriority = 10;
 //------------------------------------------------------------------------------
-static Oled oled_inst(&controller_inst);
 static THD_WORKING_AREA(waOledTask, 2048);
 static THD_FUNCTION(OledTask, arg) {
   (void)arg;

@@ -61,29 +61,39 @@ void BMSModuleManager::renumberBoardIDs()
   for (int y = 0; y < MAX_MODULE_ADDR; y++) {
     modules[y].setAddress(0);
   }
+
   numFoundModules = 0;
+  LOG_INFO("\n\nReseting all boards\n\n");
   if ((err = BMSDW(BROADCAST_ADDR, 0x3C, 0xA5)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "Broadcasting reset");
   }
 
   //assign address to boards that respond to address 0
   for (int y = 0; y < MAX_MODULE_ADDR; y++) {
-
+  //for (int y = 0; y < 2; y++) {
+    LOG_INFO("sending read on address 0\n");
     //check if a board responds to address 0
-    if ((err = BMSDR(0, 0, 1, buff)) == READ_RECV_LEN_MISMATCH) {
-      break;
-    }
+    if ((err = BMSDR(0, 0, 1, buff)) != READ_CRC_FAIL) {
+      if (err == READ_RECV_LEN_MISMATCH){
+        LOG_INFO("Did not get a response on address 0... done assigning addresses\n", y);
+        break;
+      } else if (err < 0) {
+        //retry
+        y--;
+        continue;
+      }
 
-    LOG_DEBUG("Got a response to address 0\n");
+    }
+    LOG_INFO("Got a response to address 0\n");
 
     //write address register
-    //expecting to fail crc check
-    if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) != WRITE_CRC_FAIL) {
+    LOG_INFO("Assigning it address 0x%02X\n", y+1);
+    if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) <0 ){
       BMSD_LOG_ERR(y + 1, err, "write address register");
     }
 
     modules[y].setAddress(y + 1);
-    LOG_DEBUG("Address %d assigned\n", modules[y].getAddress());
+    LOG_INFO("Address %d assigned\n", modules[y].getAddress());
     numFoundModules++;
   }
 }
@@ -311,7 +321,7 @@ void BMSModuleManager::printPackSummary()
   LOG_CONSOLE("");
   LOG_CONSOLE("");
   LOG_CONSOLE("Modules: %i    Voltage: %fV   Avg Cell Voltage: %fV     Avg Temp: %fC ", numFoundModules,
-                  getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
+              getPackVoltage(), getAvgCellVolt(), getAvgTemperature());
   LOG_CONSOLE("");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
@@ -325,7 +335,7 @@ void BMSModuleManager::printPackSummary()
       LOG_CONSOLE("                               Module #%i\n", y);
 
       LOG_CONSOLE("  Voltage: %fV   (%fV-%fV)     Temperatures: (%fC-%fC)\n", modules[y].getModuleVoltage(),
-                      modules[y].getLowCellV(), modules[y].getHighCellV(), modules[y].getLowTemp(), modules[y].getHighTemp());
+                  modules[y].getLowCellV(), modules[y].getHighCellV(), modules[y].getLowTemp(), modules[y].getHighTemp());
       if (faults > 0)
       {
         LOG_CONSOLE("  MODULE IS FAULTED:\n");
@@ -423,7 +433,7 @@ void BMSModuleManager::printPackDetails(int digits)
   LOG_CONSOLE("\n");
   LOG_CONSOLE("\n");
   LOG_CONSOLE("Modules: %i Cells: %i Strings: %i  Voltage: %fV   Avg Cell Voltage: %fV  Low Cell Voltage: %fV   High Cell Voltage: %fV Delta Voltage: %zmV   Avg Temp: %fC \n", numFoundModules, seriescells(),
-                  Pstring, getPackVoltage(), getAvgCellVolt(), LowCellVolt, HighCellVolt, (HighCellVolt - LowCellVolt) * 1000, getAvgTemperature());
+              Pstring, getPackVoltage(), getAvgCellVolt(), LowCellVolt, HighCellVolt, (HighCellVolt - LowCellVolt) * 1000, getAvgTemperature());
   LOG_CONSOLE("\n");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
@@ -454,14 +464,14 @@ void BMSModuleManager::printAllCSV()
   {
     if (modules[y].getAddress() > 0)
     {
-      LOG_CONSOLE("%d",modules[y].getAddress());
+      LOG_CONSOLE("%d", modules[y].getAddress());
       LOG_CONSOLE(",");
       for (int i = 0; i < 6; i++)
       {
-        LOG_CONSOLE("%d,",modules[y].getCellVoltage(i));
+        LOG_CONSOLE("%d,", modules[y].getCellVoltage(i));
       }
-      LOG_CONSOLE("%f,",modules[y].getTemperature(0));
-      LOG_CONSOLE("%f\n",modules[y].getTemperature(1));
+      LOG_CONSOLE("%f,", modules[y].getTemperature(0));
+      LOG_CONSOLE("%f\n", modules[y].getTemperature(1));
     }
   }
 }

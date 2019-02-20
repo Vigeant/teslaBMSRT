@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <ChRt.h>
 #include "CONFIG.h"
+#include <string.h>
 
 
 class Logger {
@@ -36,7 +37,8 @@ extern Logger log_inst;
 #define LOG_DEBUG log_inst.debug
 #define LOG_INFO log_inst.info
 #define LOG_WARN log_inst.warn
-#define LOG_ERROR log_inst.error
+#define LOG_ERR log_inst.error
+#define LOG_ERROR log_inst.error("file: %s, function: %s, line: %d\n",strrchr(__FILE__,'\\'),__func__,__LINE__); log_inst.error
 #define LOG_CONSOLE log_inst.console
 //#define LOG_CONSOLE SERIALCONSOLE.print
 

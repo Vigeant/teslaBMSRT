@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include "Logger.hpp"
+#include <string.h>
 
 //Define this to be the serial port the Tesla BMS modules are connected to.
 //On the Due you need to use a USART port (Serial1, Serial2, Serial3) and update the call to serialSpecialInit if not Serial1
@@ -59,4 +61,4 @@ extern BMSDriver bmsdriver_inst;
 
 #define BMSDR bmsdriver_inst.read
 #define BMSDW bmsdriver_inst.write
-#define BMSD_LOG_ERR bmsdriver_inst.logError
+#define BMSD_LOG_ERR LOG_ERR("file: %s, function: %s, line: %d\n",strrchr(__FILE__,'\\'),__func__,__LINE__); bmsdriver_inst.logError

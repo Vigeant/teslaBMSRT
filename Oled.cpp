@@ -73,6 +73,9 @@ void Oled::printFormat2(){
 
 void Oled::printFormat3(){
   switch(controller_inst_ptr->getState()){
+    case Controller::INIT:
+      Oled::printCentre("INIT", 1);
+      break;
     case Controller::IDLE:
       Oled::printCentre("IDLE", 1);
       break;

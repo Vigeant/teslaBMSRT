@@ -3,7 +3,7 @@
    https://github.com/tomdebree/TeslaBMSV2/blob/master/BMSUtil.h
 */
 #include "BMSDriver.hpp"
-#include "Logger.hpp"
+
 
 
 
@@ -14,7 +14,7 @@ BMSDriver::BMSDriver() {
   SERIALBMS.begin(612500);
 }
 
-void logError(const uint8_t ma, const int16_t err, const char* message) {
+void BMSDriver::logError(const uint8_t ma, const int16_t err, const char* message) {
   switch (err) {
     case ILLEGAL_READ_LEN:
       LOG_ERROR("Module %d: ILLEGAL_READ_LEN | %s\n", ma, message);
@@ -48,8 +48,11 @@ void logError(const uint8_t ma, const int16_t err, const char* message) {
 int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, const uint8_t readLen, uint8_t* recvBuff ) {
   uint8_t fixedModAddress = moduleAddress << 1;
   uint8_t byteIndex = 0;
-  uint8_t maxLen = readLen + 4;//[modAddr][readAddr][data][CRC]
+  uint8_t maxLen = readLen + 4;//[modAddr][readAddr][readLen][data][CRC]
   uint8_t buff[MAX_PAYLOAD];
+
+  //clean out recv buffer
+  while (SERIALBMS.available()) SERIALBMS.read();
 
   //check if the read is larger than our recv buffer
   if (maxLen > MAX_PAYLOAD) return ILLEGAL_READ_LEN;
@@ -66,24 +69,32 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
 
   //receiving answer
   //read the data in the buffer
+  chThdSleepMilliseconds(50);
   for (byteIndex = 0; SERIALBMS.available() && (byteIndex < maxLen); byteIndex++) {
     buff[byteIndex] = SERIALBMS.read();
+    //chThdSleepMilliseconds(5);
   }
 
   //empty out the serial read buffer
-  if (maxLen == byteIndex)
-  {
-    LOG_WARN("SERIALBMS still had crap in its buffer after reading readLen | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
-    while (SERIALBMS.available()) SERIALBMS.read();
-  } else {
-    LOG_ERROR("READ_RECV_LEN_MISMATCH | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
+  if (maxLen > byteIndex) {
+    //LOG_ERROR("READ_RECV_LEN_MISMATCH | Reading module:%3d, addr:0x%02x, len:%d, maxlen:%d != byteIndex:%d\n", moduleAddress, readAddress, readLen, maxLen, byteIndex );
     return READ_RECV_LEN_MISMATCH;
   }
+  while (SERIALBMS.available()) SERIALBMS.read();
+
 
   //verify the CRC
   if (genCRC(buff, maxLen - 1) != buff[maxLen - 1]) {
-    LOG_ERROR("READ_CRC_FAIL | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
-    return READ_CRC_FAIL;
+    //LOG_ERROR("READ_CRC_FAIL | Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
+    if (log_inst.getLogLevel() == Logger::Debug) {
+      LOG_CONSOLE("sent: %02X %02X %02X ", fixedModAddress, readAddress, readLen );
+      LOG_CONSOLE("\nrecv: ");
+      for (int i = 0; i < byteIndex; i++) {
+        LOG_CONSOLE("%02X ", buff[i]);
+      }
+      LOG_CONSOLE("\n");
+      return READ_CRC_FAIL;
+    }
   }
 
   //success! remove 4 bytes protocol wrapper around payload
@@ -107,6 +118,8 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
   uint8_t sendBuff[4];
   uint8_t recvBuff[4];
 
+  //clean out recv buffer
+  while (SERIALBMS.available()) SERIALBMS.read();
   //clean buffer
   memset(sendBuff, 0,  sizeof(sendBuff));
   memset(recvBuff, 0,  sizeof(recvBuff));
@@ -121,24 +134,36 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
 
   //receiving answer
   //read the data in the buffer
+  chThdSleepMilliseconds(50);
   for (byteIndex = 0; SERIALBMS.available() && (byteIndex < maxLen); byteIndex++) {
     recvBuff[byteIndex] = SERIALBMS.read();
   }
 
   //empty out the serial read buffer
-  if (maxLen == byteIndex)
+  if (maxLen < byteIndex)
   {
-    LOG_WARN("SERIALBMS still had crap in its buffer after reading readLen | Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
+    //LOG_WARN("SERIALBMS still had crap in its buffer after reading readLen | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
     while (SERIALBMS.available()) SERIALBMS.read();
-  } else {
-    LOG_ERROR("READ_RECV_LEN_MISMATCH | Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
+  } else if (maxLen > byteIndex) {
+    //LOG_ERROR("WRITE_RECV_LEN_MISMATCH | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
     return WRITE_RECV_LEN_MISMATCH;
   }
 
   //verify the CRC
   if (sendBuff[maxLen - 1] != recvBuff[maxLen - 1]) {
-    LOG_ERROR("READ_CRC_FAIL | Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
-    return WRITE_CRC_FAIL;
+    //LOG_ERROR("WRITE_CRC_FAIL | Writing module:%3d, addr:0x%02x, byte:%x\n", moduleAddress, writeAddress, sendByte );
+    if (log_inst.getLogLevel() == Logger::Debug) {
+      LOG_CONSOLE("sent: ");
+      for (int i = 0; i < byteIndex; i++) {
+        LOG_CONSOLE("%02X ", sendBuff[i]);
+      }
+      LOG_CONSOLE("\nrecv: ");
+      for (int i = 0; i < byteIndex; i++) {
+        LOG_CONSOLE("%02X ", recvBuff[i]);
+      }
+      LOG_CONSOLE("\n");
+      return WRITE_CRC_FAIL;
+    }
   }
 
   //success!

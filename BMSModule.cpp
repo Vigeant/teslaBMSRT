@@ -50,6 +50,7 @@ bool BMSModule::balanceCells(uint8_t cellMask, uint8_t balanceTime) {
     BMSD_LOG_ERR(moduleAddress, err, "BalanceCells mask");
     return false;
   }
+  return true;
 }
 
 /*
@@ -140,6 +141,7 @@ bool BMSModule::updateInstanceWithModuleValues()
   if (getHighTemp() > highestTemperature) highestTemperature = getHighTemp();
 
   LOG_DEBUG("Got voltage and temperature readings");
+  LOG_INFO("Module:%d, c1V:%f, c2V:%f, c3V:%f, c4V:%f, c5V:%f, c6V:%f, T1:%f, T2:%f\n",moduleAddress, cellVolt[0], cellVolt[1], cellVolt[2], cellVolt[3], cellVolt[4], cellVolt[5], temperatures[0], temperatures[1]);
   //TODO: turning the temperature wires off here seems to cause weird temperature glitches
   return true;
 }
