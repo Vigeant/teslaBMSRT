@@ -10,10 +10,12 @@ BMSModuleManager::BMSModuleManager()
   for (int i = 0; i < MAX_MODULE_ADDR; i++) {
     modules[i].setAddress(i + 1);
   }
-  lowestPackVolt = 1000.0f;
-  highestPackVolt = 0.0f;
-  lowestPackTemp = 200.0f;
-  highestPackTemp = -100.0f;
+  histLowestPackVolt = 1000.0f;
+  histHighestPackVolt = 0.0f;
+  histLowestPackTemp = 200.0f;
+  histHighestPackTemp = -100.0f;
+  histLowestCellVolt = 5.0f;
+  histHighestCellVolt = 0.0f;
   isFaulted = false;
   Pstring = 1;
 }
@@ -63,7 +65,7 @@ void BMSModuleManager::renumberBoardIDs()
     modules[y].setAddress(0);
   }
 
-  numFoundModules = 0;
+  int tempNumFoundModules = 0;
   LOG_INFO("\n\nReseting all boards\n\n");
   if ((err = BMSDW(BROADCAST_ADDR, 0x3C, 0xA5)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "Broadcasting reset");
@@ -95,8 +97,10 @@ void BMSModuleManager::renumberBoardIDs()
 
     modules[y].setAddress(y + 1);
     LOG_INFO("Address %d assigned\n", modules[y].getAddress());
-    numFoundModules++;
+    tempNumFoundModules++;
   }
+
+  numFoundModules = tempNumFoundModules;
 }
 
 /*
@@ -164,6 +168,10 @@ void BMSModuleManager::wakeBoards()
   }
 }
 
+
+/*
+   Most important function called every tick ===========================================
+*/
 void BMSModuleManager::getAllVoltTemp() {
   int16_t err;
   float tempPackVolt = 0.0f;
@@ -171,7 +179,7 @@ void BMSModuleManager::getAllVoltTemp() {
   if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x00)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "getAllVoltTemp, stop balancing");
   }
-  
+
 
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
@@ -182,16 +190,16 @@ void BMSModuleManager::getAllVoltTemp() {
       LOG_DEBUG("Lowest Cell V: %f     Highest Cell V: %f\n", modules[y].getLowCellV(), modules[y].getHighCellV());
       LOG_DEBUG("Temp1: %f       Temp2: %f\n", modules[y].getTemperature(0), modules[y].getTemperature(1));
       tempPackVolt += modules[y].getModuleVoltage();
-      if (modules[y].getLowTemp() < lowestPackTemp) lowestPackTemp = modules[y].getLowTemp();
-      if (modules[y].getHighTemp() > highestPackTemp) highestPackTemp = modules[y].getHighTemp();
+      if (modules[y].getLowTemp() < histLowestPackTemp) histLowestPackTemp = modules[y].getLowTemp();
+      if (modules[y].getHighTemp() > histHighestPackTemp) histHighestPackTemp = modules[y].getHighTemp();
     }
   }
 
 
 
   tempPackVolt = tempPackVolt / Pstring;
-  if (packVolt > highestPackVolt) highestPackVolt = tempPackVolt;
-  if (packVolt < lowestPackVolt) lowestPackVolt = tempPackVolt;
+  if (tempPackVolt > histHighestPackVolt) histHighestPackVolt = tempPackVolt;
+  if (tempPackVolt < histLowestPackVolt) histLowestPackVolt = tempPackVolt;
 
 
 
@@ -208,50 +216,73 @@ void BMSModuleManager::getAllVoltTemp() {
     }
   */
 
-  HighCellVolt = 0.0;
+  float tempHighCellVolt = 0.0;
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0) {
-      if (modules[y].getHighCellV() >  HighCellVolt)  HighCellVolt = modules[y].getHighCellV();
+      if (modules[y].getHighCellV() >  tempHighCellVolt)  tempHighCellVolt = modules[y].getHighCellV();
     }
   }
-  LowCellVolt = 5.0;
+  float tempLowCellVolt = 5.0;
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0) {
-      if (modules[y].getLowCellV() <  LowCellVolt)  LowCellVolt = modules[y].getLowCellV();
+      if (modules[y].getLowCellV() <  tempLowCellVolt)  tempLowCellVolt = modules[y].getLowCellV();
     }
   }
+
+  //update cell V watermarks
+  if ( tempLowCellVolt < histLowestCellVolt ) histLowestCellVolt =  tempHighCellVolt;
+  if ( tempHighCellVolt > histHighestCellVolt ) histHighestCellVolt = tempHighCellVolt;
 
 
   //save values to objects
+  lowCellVolt = tempLowCellVolt;
+  highCellVolt = tempHighCellVolt;
   packVolt = tempPackVolt;
-  
+
 }
 
+/*
+   current lowest cell voltage
+*/
 float BMSModuleManager::getLowCellVolt()
 {
-  return LowCellVolt;
+  return lowCellVolt;
 }
 
+/*
+   current highest cell voltage
+*/
 float BMSModuleManager::getHighCellVolt()
 {
-  return HighCellVolt;
+  return highCellVolt;
 }
 
+/*
+   current pack voltage
+*/
 float BMSModuleManager::getPackVoltage()
 {
   return packVolt;
 }
 
-float BMSModuleManager::getLowVoltage()
-{
-  return lowestPackVolt;
+float BMSModuleManager::getHistLowestCellVolt(){
+  return histLowestCellVolt;
 }
 
-float BMSModuleManager::getHighVoltage()
+float BMSModuleManager::getHistHighestCellVolt(){
+  return histHighestCellVolt;
+}
+
+float BMSModuleManager::getHistLowestPackVolt()
 {
-  return highestPackVolt;
+  return histLowestPackVolt;
+}
+
+float BMSModuleManager::getHistHighestPackVolt()
+{
+  return histHighestPackVolt;
 }
 
 void BMSModuleManager::setBatteryID(int id)
@@ -259,9 +290,9 @@ void BMSModuleManager::setBatteryID(int id)
   batteryID = id;
 }
 
-void BMSModuleManager::setPstrings(int Pstrings)
+void BMSModuleManager::setPstrings(int pstrings)
 {
-  Pstring = Pstrings;
+  Pstring = pstrings;
 }
 
 float BMSModuleManager::getAvgTemperature()
@@ -269,24 +300,19 @@ float BMSModuleManager::getAvgTemperature()
   float avg = 0.0f;
   highTemp = -100;
   lowTemp = 999;
-  int y = 0; //counter for modules below -70 (no sensors connected)
+  int y = 0; //counter for modules above -70 (sensors connected)
   for (int x = 0; x < MAX_MODULE_ADDR; x++)
   {
-    if (modules[x].getAddress() > 0)
-    {
-      if (modules[x].getAvgTemp() > -70)
-      {
+    if (modules[x].getAddress() > 0) {
+      if (modules[x].getAvgTemp() > -70) {
         avg += modules[x].getAvgTemp();
-      }
-      else
-      {
         y++;
       }
+    } else {
+      break;
     }
   }
-  avg = avg / (float)(numFoundModules - y);
-
-  return avg;
+  return avg / (float)(y);
 }
 
 float BMSModuleManager::getHighTemperature()
@@ -303,6 +329,8 @@ float BMSModuleManager::getHighTemperature()
           highTemp = modules[x].getAvgTemp();
         }
       }
+    } else {
+      break;
     }
   }
 
@@ -323,6 +351,8 @@ float BMSModuleManager::getLowTemperature()
           lowTemp = modules[x].getAvgTemp();
         }
       }
+    } else {
+      break;
     }
   }
   return lowTemp;
@@ -463,7 +493,7 @@ void BMSModuleManager::printPackDetails(int digits)
   LOG_CONSOLE("\n");
   LOG_CONSOLE("\n");
   LOG_CONSOLE("Modules: %i Cells: %i Strings: %i  Voltage: %fV   Avg Cell Voltage: %fV  Low Cell Voltage: %fV   High Cell Voltage: %fV Delta Voltage: %zmV   Avg Temp: %fC \n", numFoundModules, seriescells(),
-              Pstring, getPackVoltage(), getAvgCellVolt(), LowCellVolt, HighCellVolt, (HighCellVolt - LowCellVolt) * 1000, getAvgTemperature());
+              Pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt, (highCellVolt - lowCellVolt) * 1000, getAvgTemperature());
   LOG_CONSOLE("\n");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {

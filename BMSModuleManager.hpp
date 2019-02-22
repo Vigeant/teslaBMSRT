@@ -33,8 +33,11 @@ class BMSModuleManager
     float getAvgCellVolt();
     float getLowCellVolt();
     float getHighCellVolt();
-    float getHighVoltage();
-    float getLowVoltage();
+    float getHistLowestPackVolt();
+    float getHistHighestPackVolt();
+    float getHistLowestCellVolt();
+    float getHistHighestCellVolt();
+    float getHistHighestPackTemp();
     /*
       void processCANMsg(CAN_FRAME &frame);
     */
@@ -46,12 +49,14 @@ class BMSModuleManager
   private:
     float packVolt;                         // All modules added together
     int Pstring;
-    float LowCellVolt;
-    float HighCellVolt;
-    float lowestPackVolt;
-    float highestPackVolt;
-    float lowestPackTemp;
-    float highestPackTemp;
+    float lowCellVolt;
+    float highCellVolt;
+    float histLowestPackVolt;
+    float histHighestPackVolt;
+    float histLowestCellVolt;
+    float histHighestCellVolt;
+    float histLowestPackTemp;
+    float histHighestPackTemp;
     float highTemp;
     float lowTemp;
     BMSModule modules[MAX_MODULE_ADDR + 1]; // store data for as many modules as we've configured for.
