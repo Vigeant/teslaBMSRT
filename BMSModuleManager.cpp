@@ -1,4 +1,4 @@
-//#include "config.h"
+#include "CONFIG.h"
 #include "BMSModuleManager.hpp"
 //#include "BMSUtil.h"
 #include "Logger.hpp"
@@ -40,14 +40,16 @@ void BMSModuleManager::balanceCells(uint8_t duration)
       balance = 0;
       for (int i = 0; i < 6; i++)
       {
-        if (getLowCellVolt() < modules[y].getCellVoltage(i))
+        if (modules[y].getCellVoltage(i) > getLowCellVolt() + BALANCE_CELL_V_OFFSET)
         {
           balance = balance | (1 << i);
 
         }
       }
-      LOG_DEBUG("module %d - 0x%02X\n", modules[y].getAddress(), balance);
+      LOG_DEBUG("module %d - 0x%x\n", modules[y].getAddress(), balance);
       (void) modules[y].balanceCells(balance, duration);
+    } else {
+      break;
     }
   }
 }

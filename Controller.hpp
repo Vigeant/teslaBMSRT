@@ -7,31 +7,34 @@
 #define CONTROLLER_HPP_
 
 class Controller {
-public:
-  enum ControllerState {
+  public:
+    enum ControllerState {
       INIT = 0, IDLE = 1, CHARGING = 2, DRIVE = 3
-  };  
-  void doController();
-  Controller();
-  ControllerState getState();
-  BMSModuleManager* getBMSPtr();
-  
-private:
+    };
+    void doController();
+    Controller();
+    ControllerState getState();
+    BMSModuleManager* getBMSPtr();
 
-  BMSModuleManager bms;
+  private:
 
-  //initialization functions
-  void initBMSManager(); //reset all boards and assign address to each board
+    BMSModuleManager bms;
 
-  //run-time functions
-  void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
-  void balanceCells(); //balances the cells according to thresholds in the BMSModuleManager
-   
+    //initialization functions
+    void initBMSManager(); //reset all boards and assign address to each board
 
-  ControllerState state; 
-  void idle();
-  void charging();
-  void drive();
+    //run-time functions
+    void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
+    void balanceCells(); //balances the cells according to thresholds in the BMSModuleManager
+
+    void assertFaultLine();
+    void clearFaultLine();
+    void cycleCharger();
+
+    ControllerState state;
+    void idle();
+    void charging();
+    void drive();
 
 };
 
