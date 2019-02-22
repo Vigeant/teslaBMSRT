@@ -82,8 +82,8 @@ void Oled::printFormat1() {
 }
 
 /*
-VChi      ou VCdiff au lieu de ces deux valeurs…
 VClo
+VChi      ou VCdiff au lieu de ces deux valeurs…
 */
 void Oled::printFormat2() {
   const int col0 = 0;
@@ -92,22 +92,22 @@ void Oled::printFormat2() {
   oled.clear(PAGE);            // Clear the display
   oled.setCursor(col0, 0);        // Set cursor to top-left
   oled.setFontType(1);         // Smallest font
-  oled.print("VChi");          // Print "A0"
+  oled.print("VClo");          // Print "A0"
   oled.setCursor(col1, 0);
-  oled.print("VClo");
+  oled.print("VChi");
 
   oled.setFontType(2);         // 7-segment font
   oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHighCellVolt());  // Print a0 reading
+  oled.print(controller_inst_ptr->getBMSPtr()->getLowCellVolt());  // Print a0 reading
   oled.setCursor(col1, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getLowCellVolt());
+  oled.print(controller_inst_ptr->getBMSPtr()->getHighCellVolt());
   oled.display();
 }
 
 /*
-VCmax
-VCmin
 
+VCmin
+VCmax
 */
 void Oled::printFormat3() {
   const int col0 = 0;
@@ -145,9 +145,9 @@ void Oled::printFormat4() {
 
   oled.setFontType(2);         // 7-segment font
   oled.setCursor(col0, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHistLowestCellVolt());
+  oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
   oled.setCursor(col1, oled.getLCDHeight() / 2);
-  oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellVolt());
+  oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
   oled.display();
 }
 

@@ -16,8 +16,9 @@ BMSModuleManager::BMSModuleManager()
   histHighestPackTemp = -100.0f;
   histLowestCellVolt = 5.0f;
   histHighestCellVolt = 0.0f;
+  histHighestCellDiffVolt = 0.0f;
   isFaulted = false;
-  Pstring = 1;
+  pstring = 1;
 }
 
 void BMSModuleManager::resetModuleRecordedValues()
@@ -197,7 +198,7 @@ void BMSModuleManager::getAllVoltTemp() {
 
 
 
-  tempPackVolt = tempPackVolt / Pstring;
+  tempPackVolt = tempPackVolt / pstring;
   if (tempPackVolt > histHighestPackVolt) histHighestPackVolt = tempPackVolt;
   if (tempPackVolt < histLowestPackVolt) histLowestPackVolt = tempPackVolt;
 
@@ -232,15 +233,26 @@ void BMSModuleManager::getAllVoltTemp() {
   }
 
   //update cell V watermarks
-  if ( tempLowCellVolt < histLowestCellVolt ) histLowestCellVolt =  tempHighCellVolt;
+  if ( tempLowCellVolt < histLowestCellVolt ) histLowestCellVolt =  tempLowCellVolt;
   if ( tempHighCellVolt > histHighestCellVolt ) histHighestCellVolt = tempHighCellVolt;
 
+  float tempHCDV = tempHighCellVolt - tempLowCellVolt;
+  if ( histHighestCellDiffVolt < tempHCDV ) histHighestCellDiffVolt = tempHCDV;
 
   //save values to objects
+  
   lowCellVolt = tempLowCellVolt;
   highCellVolt = tempHighCellVolt;
   packVolt = tempPackVolt;
 
+}
+
+float BMSModuleManager::getHistHighestPackTemp(){
+  return histHighestPackTemp;
+}
+
+float BMSModuleManager::getHistHighestCellDiffVolt(){
+  return histHighestCellDiffVolt;
 }
 
 /*
@@ -292,7 +304,7 @@ void BMSModuleManager::setBatteryID(int id)
 
 void BMSModuleManager::setPstrings(int pstrings)
 {
-  Pstring = pstrings;
+  pstring = pstrings;
 }
 
 float BMSModuleManager::getAvgTemperature()
@@ -493,7 +505,7 @@ void BMSModuleManager::printPackDetails(int digits)
   LOG_CONSOLE("\n");
   LOG_CONSOLE("\n");
   LOG_CONSOLE("Modules: %i Cells: %i Strings: %i  Voltage: %fV   Avg Cell Voltage: %fV  Low Cell Voltage: %fV   High Cell Voltage: %fV Delta Voltage: %zmV   Avg Temp: %fC \n", numFoundModules, seriescells(),
-              Pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt, (highCellVolt - lowCellVolt) * 1000, getAvgTemperature());
+              pstring, getPackVoltage(), getAvgCellVolt(), lowCellVolt, highCellVolt, (highCellVolt - lowCellVolt) * 1000, getAvgTemperature());
   LOG_CONSOLE("\n");
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {

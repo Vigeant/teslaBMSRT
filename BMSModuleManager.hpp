@@ -38,6 +38,7 @@ class BMSModuleManager
     float getHistLowestCellVolt();
     float getHistHighestCellVolt();
     float getHistHighestPackTemp();
+    float getHistHighestCellDiffVolt();
     /*
       void processCANMsg(CAN_FRAME &frame);
     */
@@ -48,13 +49,14 @@ class BMSModuleManager
 
   private:
     float packVolt;                         // All modules added together
-    int Pstring;
+    int pstring;
     float lowCellVolt;
     float highCellVolt;
     float histLowestPackVolt;
     float histHighestPackVolt;
     float histLowestCellVolt;
     float histHighestCellVolt;
+    float histHighestCellDiffVolt;
     float histLowestPackTemp;
     float histHighestPackTemp;
     float highTemp;
