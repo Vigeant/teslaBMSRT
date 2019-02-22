@@ -34,8 +34,8 @@ void BMSModule::resetRecordedValues()
 }
 
 /*
- * Balance function
- * 5 second balance limit, if not triggered to balance it will stop after 5 seconds
+   Balance function
+   5 second balance limit, if not triggered to balance it will stop after 5 seconds
 */
 bool BMSModule::balanceCells(uint8_t cellMask, uint8_t balanceTime) {
   int16_t err;
@@ -68,6 +68,8 @@ bool BMSModule::updateInstanceWithModuleValues()
   */
   //BMSDR(moduleAddress, REG_DEV_STATUS, 1, buff);
   //BMSDR(moduleAddress, REG_BAL_TIME, 1, buff);
+
+
   if ((err = BMSDR(moduleAddress, REG_ALERT_STATUS, 4, buff)) > 0) {
     alerts = buff[0];
     faults = buff[1];
@@ -78,7 +80,7 @@ bool BMSModule::updateInstanceWithModuleValues()
     BMSD_LOG_ERR(moduleAddress, err, "Reading Status Registers");
     return false;
   }
-
+  
   /*
      Voltage and Temperature registers
   */
@@ -124,6 +126,7 @@ bool BMSModule::updateInstanceWithModuleValues()
     BMSD_LOG_ERR(moduleAddress, err, "Reading voltage registers");
     return false;
   }
+  
 
   //Now using steinhart/hart equation for temperatures. We'll see if it is better than old code.
   tempTemp = (1.78f / ((buff[14] * 256 + buff[15] + 2) / 33046.0f) - 3.57f);
@@ -141,7 +144,11 @@ bool BMSModule::updateInstanceWithModuleValues()
   if (getHighTemp() > highestTemperature) highestTemperature = getHighTemp();
 
   LOG_DEBUG("Got voltage and temperature readings");
-  LOG_INFO("Module:%d, c1V:%f, c2V:%f, c3V:%f, c4V:%f, c5V:%f, c6V:%f, T1:%f, T2:%f\n",moduleAddress, cellVolt[0], cellVolt[1], cellVolt[2], cellVolt[3], cellVolt[4], cellVolt[5], temperatures[0], temperatures[1]);
+  //return true;
+  LOG_INFO("Module:%d\n",moduleAddress);
+  LOG_INFO("c1V:%f\n",cellVolt[0]);
+  //LOG_INFO("Module:%d, c1V:%f, c2V:%f, c3V:%f, c4V:%f, c5V:%f, c6V:%f, T1:%f, T2:%f\n", moduleAddress, cellVolt[0], cellVolt[1], cellVolt[2], cellVolt[3], cellVolt[4], cellVolt[5]);
+  //LOG_INFO("T1:%f, T2:%f\n", moduleAddress, cellVolt[0], cellVolt[1], cellVolt[2], cellVolt[3], cellVolt[4], cellVolt[5], temperatures[0], temperatures[1]);
   //TODO: turning the temperature wires off here seems to cause weird temperature glitches
   return true;
 }

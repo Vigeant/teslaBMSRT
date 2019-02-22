@@ -13,66 +13,87 @@
 
 static TeensyView oled(PIN_RESET, PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI);
 
-Oled::Oled(Controller* cont_inst_ptr){
+Oled::Oled(Controller* cont_inst_ptr) {
   oled.begin();    // Initialize the OLED
   oled.clear(ALL); // Clear the display's internal memory
   oled.display();  // Display what's in the buffer (splashscreen)
   //delay(1000);     // Delay 1000 ms
   oled.clear(PAGE); // Clear the buffer.
-  state = FMT3;
+  state = FMT4;
   controller_inst_ptr = cont_inst_ptr;
 }
 
-void Oled::printFormat1(){
-  const int row0 = 0;
-  const int row1 = 42;
-  const int row2 = 85;
+/*
+   pVcur cVdif
+   0.00 0.00
+*/
+void Oled::printFormat1() {
+  const int col0 = 0;
+  const int col1 = oled.getLCDWidth() / 2;
 
   oled.clear(PAGE);            // Clear the display
-  oled.setCursor(row0, 0);        // Set cursor to top-left
+  oled.setCursor(col0, 0);     // Set cursor to top-left
   oled.setFontType(1);         // Smallest font
-  oled.print("Vcur");          // Print "A0"
-  oled.setCursor(row1, 0);
-  oled.print("Vdif");
-  oled.setCursor(row2, 0);
-  oled.print("Tcur");
+  oled.print("Vcur");
+  oled.setCursor(col1, 0);
+  oled.print("Vmax");
 
   oled.setFontType(2);         // 7-segment font
-  oled.setCursor(row0, 16);
-  oled.print(analogRead(A0));  // Print a0 reading
-  oled.setCursor(row1, 16);
-  oled.print(analogRead(A0));
-  oled.setCursor(row2, 16);
-  oled.print(12.3);
+  oled.setCursor(col0, oled.getLCDHeight() / 2);
+  oled.print(controller_inst_ptr->getBMSPtr()->getPackVoltage());
+  oled.setCursor(col1, oled.getLCDHeight() / 2);
+  oled.print(controller_inst_ptr->getBMSPtr()->getHighVoltage());
   oled.display();
 }
 
-void Oled::printFormat2(){
-  int row0 = 0;
-  int row1 = 42;
-  int row2 = 85;
+/*
+   cVmax cVlow
+   0.00 0.00
+*/
+void Oled::printFormat2() {
+  const int col0 = 0;
+  const int col1 = oled.getLCDWidth() / 2;
 
   oled.clear(PAGE);            // Clear the display
-  oled.setCursor(row0, 0);        // Set cursor to top-left
+  oled.setCursor(col0, 0);        // Set cursor to top-left
   oled.setFontType(1);         // Smallest font
-  oled.print("Vmax");          // Print "A0"
-  oled.setCursor(row1, 0);
-  oled.print("Vlow");
-  oled.setCursor(row2, 0);
+  oled.print("cVdif");          // Print "A0"
+  oled.setCursor(col1, 0);
+  oled.print("cVlow");
+
+  oled.setFontType(2);         // 7-segment font
+  oled.setCursor(col0, oled.getLCDHeight() / 2);
+  oled.print(controller_inst_ptr->getBMSPtr()->getHighVoltage());  // Print a0 reading
+  oled.setCursor(col1, oled.getLCDHeight() / 2);
+  oled.print(controller_inst_ptr->getBMSPtr()->getLowVoltage());
+  oled.display();
+}
+
+/*
+   Tcur Tmax
+   0.00 0.00
+*/
+void Oled::printFormat3() {
+  const int col0 = 0;
+  const int col1 = oled.getLCDWidth() / 2;
+
+  oled.clear(PAGE);            // Clear the display
+  oled.setCursor(col0, 0);        // Set cursor to top-left
+  oled.setFontType(1);         // Smallest font
+  oled.print("Tcur");          
+  oled.setCursor(col1, 0);
   oled.print("Tmax");
 
   oled.setFontType(2);         // 7-segment font
-  oled.setCursor(row0, 16);
-  oled.print(analogRead(A0));  // Print a0 reading
-  oled.setCursor(row1, 16);
-  oled.print(analogRead(A0));
-  oled.setCursor(row2, 16);
-  oled.print(12.3);
+  oled.setCursor(col0, oled.getLCDHeight() / 2);
+  oled.print(controller_inst_ptr->getBMSPtr()->getAvgTemperature());
+  oled.setCursor(col1, oled.getLCDHeight() / 2);
+  oled.print(controller_inst_ptr->getBMSPtr()->getHighTemperature());
   oled.display();
 }
 
-void Oled::printFormat3(){
-  switch(controller_inst_ptr->getState()){
+void Oled::printFormat4() {
+  switch (controller_inst_ptr->getState()) {
     case Controller::INIT:
       Oled::printCentre("INIT", 1);
       break;
@@ -91,27 +112,34 @@ void Oled::printFormat3(){
   }
 }
 
-void Oled::doOled(){
+void Oled::doOled() {
   const int stateticks = 6;
   static int ticks = 0;
-  switch (state){
+  switch (state) {
     case FMT1:
       Oled::printFormat1();
-      if (ticks >= stateticks){
+      if (ticks >= stateticks) {
         ticks = 0;
         state = FMT2;
       }
       break;
     case FMT2:
       Oled::printFormat2();
-      if (ticks >= stateticks){
+      if (ticks >= stateticks) {
         ticks = 0;
         state = FMT3;
       }
       break;
     case FMT3:
       Oled::printFormat3();
-      if (ticks >= stateticks){
+      if (ticks >= stateticks) {
+        ticks = 0;
+        state = FMT4;
+      }
+      break;
+    case FMT4:
+      Oled::printFormat4();
+      if (ticks >= stateticks) {
         ticks = 0;
         state = FMT1;
       }
@@ -120,7 +148,7 @@ void Oled::doOled(){
       break;
   }
   ticks++;
-  
+
 }
 
 // Center and print a small values string

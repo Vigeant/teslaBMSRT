@@ -13,14 +13,14 @@ public:
 
 private:
   enum formatState {
-      FMT1 = 0, FMT2 = 1, FMT3 = 2
+      FMT1 = 0, FMT2 = 1, FMT3 = 2, FMT4 = 3
   };
   formatState state;
   Controller* controller_inst_ptr;
   void printFormat1();
   void printFormat2();
   void printFormat3();
+  void printFormat4();
 
   void printCentre(const char*  , int);
-  //void printCentre(String  , int);
 };

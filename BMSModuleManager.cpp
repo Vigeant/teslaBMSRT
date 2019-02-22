@@ -15,6 +15,7 @@ BMSModuleManager::BMSModuleManager()
   lowestPackTemp = 200.0f;
   highestPackTemp = -100.0f;
   isFaulted = false;
+  Pstring = 1;
 }
 
 void BMSModuleManager::resetModuleRecordedValues()
@@ -70,11 +71,11 @@ void BMSModuleManager::renumberBoardIDs()
 
   //assign address to boards that respond to address 0
   for (int y = 0; y < MAX_MODULE_ADDR; y++) {
-  //for (int y = 0; y < 2; y++) {
+    //for (int y = 0; y < 2; y++) {
     LOG_INFO("sending read on address 0\n");
     //check if a board responds to address 0
     if ((err = BMSDR(0, 0, 1, buff)) != READ_CRC_FAIL) {
-      if (err == READ_RECV_LEN_MISMATCH){
+      if (err == READ_RECV_LEN_MISMATCH) {
         LOG_INFO("Did not get a response on address 0... done assigning addresses\n", y);
         break;
       } else if (err < 0) {
@@ -87,8 +88,8 @@ void BMSModuleManager::renumberBoardIDs()
     LOG_INFO("Got a response to address 0\n");
 
     //write address register
-    LOG_INFO("Assigning it address 0x%02X\n", y+1);
-    if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) <0 ){
+    LOG_INFO("Assigning it address 0x%02X\n", y + 1);
+    if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) < 0 ) {
       BMSD_LOG_ERR(y + 1, err, "write address register");
     }
 
@@ -165,11 +166,12 @@ void BMSModuleManager::wakeBoards()
 
 void BMSModuleManager::getAllVoltTemp() {
   int16_t err;
-  packVolt = 0.0f;
+  float tempPackVolt = 0.0f;
   //stop balancing
   if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x00)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "getAllVoltTemp, stop balancing");
   }
+  
 
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
@@ -179,15 +181,17 @@ void BMSModuleManager::getAllVoltTemp() {
       LOG_DEBUG("Module voltage: %f\n", modules[y].getModuleVoltage());
       LOG_DEBUG("Lowest Cell V: %f     Highest Cell V: %f\n", modules[y].getLowCellV(), modules[y].getHighCellV());
       LOG_DEBUG("Temp1: %f       Temp2: %f\n", modules[y].getTemperature(0), modules[y].getTemperature(1));
-      packVolt += modules[y].getModuleVoltage();
+      tempPackVolt += modules[y].getModuleVoltage();
       if (modules[y].getLowTemp() < lowestPackTemp) lowestPackTemp = modules[y].getLowTemp();
       if (modules[y].getHighTemp() > highestPackTemp) highestPackTemp = modules[y].getHighTemp();
     }
   }
 
-  packVolt = packVolt / Pstring;
-  if (packVolt > highestPackVolt) highestPackVolt = packVolt;
-  if (packVolt < lowestPackVolt) lowestPackVolt = packVolt;
+
+
+  tempPackVolt = tempPackVolt / Pstring;
+  if (packVolt > highestPackVolt) highestPackVolt = tempPackVolt;
+  if (packVolt < lowestPackVolt) lowestPackVolt = tempPackVolt;
 
 
 
@@ -218,6 +222,11 @@ void BMSModuleManager::getAllVoltTemp() {
       if (modules[y].getLowCellV() <  LowCellVolt)  LowCellVolt = modules[y].getLowCellV();
     }
   }
+
+
+  //save values to objects
+  packVolt = tempPackVolt;
+  
 }
 
 float BMSModuleManager::getLowCellVolt()
@@ -268,14 +277,6 @@ float BMSModuleManager::getAvgTemperature()
       if (modules[x].getAvgTemp() > -70)
       {
         avg += modules[x].getAvgTemp();
-        if (modules[x].getAvgTemp() > highTemp)
-        {
-          highTemp = modules[x].getAvgTemp();
-        }
-        if (modules[x].getAvgTemp() < lowTemp)
-        {
-          lowTemp = modules[x].getAvgTemp();
-        }
       }
       else
       {
@@ -290,11 +291,40 @@ float BMSModuleManager::getAvgTemperature()
 
 float BMSModuleManager::getHighTemperature()
 {
+  highTemp = -100;
+  for (int x = 0; x < MAX_MODULE_ADDR; x++)
+  {
+    if (modules[x].getAddress() > 0)
+    {
+      if (modules[x].getAvgTemp() > -70)
+      {
+        if (modules[x].getAvgTemp() > highTemp)
+        {
+          highTemp = modules[x].getAvgTemp();
+        }
+      }
+    }
+  }
+
   return highTemp;
 }
 
 float BMSModuleManager::getLowTemperature()
 {
+  lowTemp = 999;
+  for (int x = 0; x < MAX_MODULE_ADDR; x++)
+  {
+    if (modules[x].getAddress() > 0)
+    {
+      if (modules[x].getAvgTemp() > -70)
+      {
+        if (modules[x].getAvgTemp() < lowTemp)
+        {
+          lowTemp = modules[x].getAvgTemp();
+        }
+      }
+    }
+  }
   return lowTemp;
 }
 

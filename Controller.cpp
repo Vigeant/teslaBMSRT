@@ -10,28 +10,27 @@
 void Controller::doController() {
   const int stateticks = 1;
   static int ticks = 0;
-  initBMSManager();
   switch (state) {
     case INIT:
       initBMSManager();
       state = IDLE;
       break;
     case IDLE:
-      //idle();
+      idle();
       if (ticks >= stateticks) {
         ticks = 0;
         state = CHARGING;
       }
       break;
     case CHARGING:
-      //charging();
+      charging();
       if (ticks >= stateticks) {
         ticks = 0;
         state = DRIVE;
       }
       break;
     case DRIVE:
-      //drive();
+      drive();
       if (ticks >= stateticks) {
         ticks = 0;
         state = IDLE;
@@ -85,4 +84,8 @@ void Controller::drive() {
 
 Controller::ControllerState Controller::getState() {
   return state;
+}
+
+BMSModuleManager* Controller::getBMSPtr() {
+  return &bms;
 }
