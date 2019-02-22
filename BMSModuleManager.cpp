@@ -91,7 +91,7 @@ void BMSModuleManager::renumberBoardIDs()
     LOG_INFO("Got a response to address 0\n");
 
     //write address register
-    LOG_INFO("Assigning it address 0x%02X\n", y + 1);
+    LOG_INFO("Assigning it address 0x%x\n", y + 1);
     if ((err = BMSDW(0, REG_ADDR_CTRL, (y + 1) | 0x80)) < 0 ) {
       BMSD_LOG_ERR(y + 1, err, "write address register");
     }
@@ -185,14 +185,16 @@ void BMSModuleManager::getAllVoltTemp() {
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
     if (modules[y].getAddress() > 0) {
-      LOG_DEBUG("Module %i exists. Reading voltage and temperature values\n", modules[y].getAddress());
+      //LOG_DEBUG("Module %i exists. Reading voltage and temperature values\n", modules[y].getAddress());
       modules[y].updateInstanceWithModuleValues();
-      LOG_DEBUG("Module voltage: %f\n", modules[y].getModuleVoltage());
-      LOG_DEBUG("Lowest Cell V: %f     Highest Cell V: %f\n", modules[y].getLowCellV(), modules[y].getHighCellV());
-      LOG_DEBUG("Temp1: %f       Temp2: %f\n", modules[y].getTemperature(0), modules[y].getTemperature(1));
+      //LOG_DEBUG("Module voltage: %f\n", modules[y].getModuleVoltage());
+      //LOG_DEBUG("Lowest Cell V: %f     Highest Cell V: %f\n", modules[y].getLowCellV(), modules[y].getHighCellV());
+      //LOG_DEBUG("Temp1: %f       Temp2: %f\n", modules[y].getTemperature(0), modules[y].getTemperature(1));
       tempPackVolt += modules[y].getModuleVoltage();
       if (modules[y].getLowTemp() < histLowestPackTemp) histLowestPackTemp = modules[y].getLowTemp();
       if (modules[y].getHighTemp() > histHighestPackTemp) histHighestPackTemp = modules[y].getHighTemp();
+    } else {
+      break;
     }
   }
 

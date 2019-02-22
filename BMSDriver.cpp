@@ -62,7 +62,7 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
   memset(recvBuff, 0,  readLen);
 
   //sending read command on serial port
-  LOG_DEBUG("Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
+  //LOG_DEBUG("Reading module:%3d, addr:0x%02x, len:%d\n", moduleAddress, readAddress, readLen );
   SERIALBMS.write(fixedModAddress);
   SERIALBMS.write(readAddress);
   SERIALBMS.write(readLen);
@@ -102,8 +102,8 @@ int16_t BMSDriver::read(const uint8_t moduleAddress, const uint8_t readAddress, 
   LOG_DEBUG("Received:");
   if (log_inst.getLogLevel() == Logger::Debug) {
     for (int i = 0; i < readLen; i++) {
-      if (i % 16 == 0) LOG_CONSOLE("\n%04x\t", i);
-      LOG_CONSOLE("%02X ", recvBuff[i]);
+      if (i % 16 == 0) LOG_CONSOLE("\n%x\t", i);
+      LOG_CONSOLE("%x ", recvBuff[i]);
     }
     LOG_CONSOLE("\n");
   }
@@ -125,7 +125,7 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
   memset(recvBuff, 0,  sizeof(recvBuff));
 
   //sending read command on serial port
-  LOG_DEBUG("Writing module:%3d, addr:0x%02x, byte:%d\n", moduleAddress, writeAddress, sendByte );
+  LOG_DEBUG("Writing module:%d, addr:0x%x, byte:%d\n", moduleAddress, writeAddress, sendByte );
   sendBuff[0] = fixedModAddress | 1;
   sendBuff[1] = writeAddress;
   sendBuff[2] = sendByte;
@@ -155,11 +155,11 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
     if (log_inst.getLogLevel() == Logger::Debug) {
       LOG_CONSOLE("sent: ");
       for (int i = 0; i < byteIndex; i++) {
-        LOG_CONSOLE("%02X ", sendBuff[i]);
+        LOG_CONSOLE("%x ", sendBuff[i]);
       }
       LOG_CONSOLE("\nrecv: ");
       for (int i = 0; i < byteIndex; i++) {
-        LOG_CONSOLE("%02X ", recvBuff[i]);
+        LOG_CONSOLE("%x ", recvBuff[i]);
       }
       LOG_CONSOLE("\n");
       return WRITE_CRC_FAIL;
@@ -167,7 +167,7 @@ int16_t BMSDriver::write(const uint8_t moduleAddress, const uint8_t writeAddress
   }
 
   //success!
-  LOG_DEBUG("Write Successful!\n");
+  //LOG_DEBUG("Write Successful!\n");
   return byteIndex;
 }
 

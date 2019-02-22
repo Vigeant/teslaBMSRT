@@ -145,8 +145,8 @@ bool BMSModule::updateInstanceWithModuleValues()
 
   LOG_DEBUG("Got voltage and temperature readings");
   //return true;
-  LOG_INFO("Module:%d\n",moduleAddress);
-  LOG_INFO("c1V:%f\n",cellVolt[0]);
+  //LOG_INFO("Module:%d\n",moduleAddress);
+  //LOG_INFO("c1V:%f\n",cellVolt[0]);
   //LOG_INFO("Module:%d, c1V:%f, c2V:%f, c3V:%f, c4V:%f, c5V:%f, c6V:%f, T1:%f, T2:%f\n", moduleAddress, cellVolt[0], cellVolt[1], cellVolt[2], cellVolt[3], cellVolt[4], cellVolt[5]);
   //LOG_INFO("T1:%f, T2:%f\n", moduleAddress, cellVolt[0], cellVolt[1], cellVolt[2], cellVolt[3], cellVolt[4], cellVolt[5], temperatures[0], temperatures[1]);
   //TODO: turning the temperature wires off here seems to cause weird temperature glitches
