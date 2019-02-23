@@ -328,7 +328,11 @@ float BMSModuleManager::getAvgTemperature()
       break;
     }
   }
-  return avg / (float)(y);
+  if (y>0){
+    return avg / (float)(y);
+  } else{
+    return 0;
+  }
 }
 
 float BMSModuleManager::getHighTemperature()

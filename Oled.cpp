@@ -147,6 +147,7 @@ void Oled::printFormat4() {
   oled.setCursor(col0, oled.getLCDHeight() / 2);
   oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
   oled.setCursor(col1, oled.getLCDHeight() / 2);
+  oled.setFontType(1);
   oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
   oled.display();
 }
