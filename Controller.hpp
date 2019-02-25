@@ -9,7 +9,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT = 0, IDLE = 1, CHARGING = 2, DRIVE = 3
+      INIT = 0, IDLE = 1, CHARGING = 2, RUN = 3
     };
     void doController();
     Controller();
@@ -34,7 +34,7 @@ class Controller {
     ControllerState state;
     void idle();
     void charging();
-    void drive();
+    void run();
 
 };
 

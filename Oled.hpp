@@ -13,7 +13,7 @@ public:
 
 private:
   enum formatState {
-      FMT1 = 0, FMT2 = 1, FMT3 = 2, FMT4 = 3, FMT5 = 4
+      FMT1 = 0, FMT2 = 1, FMT3 = 2, FMT4 = 3, FMT5 = 4, FMT6 = 5
   };
   formatState state;
   Controller* controller_inst_ptr;
@@ -22,6 +22,7 @@ private:
   void printFormat3();
   void printFormat4();
   void printFormat5();
-
+  void printFormat6();
+  
   void printCentre(const char*  , int);
 };

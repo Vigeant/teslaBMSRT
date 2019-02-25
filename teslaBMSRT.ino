@@ -2,8 +2,10 @@
 
 #include "Cons.hpp"
 #include "Logger.hpp"
+#include "sevenSegment.h" //preload my header file
 #include "Oled.hpp"
 #include "Controller.hpp"
+
 
 //instantiate the console
 static Controller controller_inst;

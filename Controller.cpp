@@ -26,11 +26,11 @@ void Controller::doController() {
       charging();
       if (ticks >= stateticks) {
         ticks = 0;
-        state = DRIVE;
+        state = RUN;
       }
       break;
-    case DRIVE:
-      drive();
+    case RUN:
+      run();
       if (ticks >= stateticks) {
         ticks = 0;
         state = IDLE;
@@ -129,7 +129,7 @@ void Controller::charging() {
 
 }
 
-void Controller::drive() {
+void Controller::run() {
   syncModuleDataObjects();
 
 }

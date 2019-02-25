@@ -147,7 +147,7 @@ void Oled::printFormat4() {
   oled.setCursor(col0, oled.getLCDHeight() / 2);
   oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestCellDiffVolt());
   oled.setCursor(col1, oled.getLCDHeight() / 2);
-  oled.setFontType(1);
+  //oled.setFontType(1);
   oled.print(controller_inst_ptr->getBMSPtr()->getHistHighestPackTemp());
   oled.display();
 }
@@ -163,13 +163,26 @@ void Oled::printFormat5() {
     case Controller::CHARGING:
       Oled::printCentre("CHARGING", 1);
       break;
-    case Controller::DRIVE:
+    case Controller::RUN:
       Oled::printCentre("DRIVE", 1);
       break;
     default:
       Oled::printCentre("default", 1);
       break;
   }
+}
+
+void Oled::printFormat6() {
+  const int col0 = 0;
+  const int col1 = oled.getLCDWidth() / 2;
+
+  oled.clear(PAGE);            // Clear the display
+  oled.setCursor(col0, 0);        // Set cursor to top-left
+  oled.setFontType(2);         // Smallest font
+  oled.print("-./1234567890");          
+  oled.setCursor(col1, 0);
+  oled.print("Tmax");
+  oled.display();
 }
 
 void Oled::doOled() {
@@ -209,6 +222,13 @@ void Oled::doOled() {
       if (ticks >= stateticks) {
         ticks = 0;
         state = FMT1;
+      }
+      break;
+    case FMT6:
+      Oled::printFormat6();
+      if (ticks >= stateticks) {
+        ticks = 0;
+        state = FMT6;
       }
       break;
     default:
