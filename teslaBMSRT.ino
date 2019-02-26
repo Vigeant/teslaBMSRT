@@ -1,8 +1,7 @@
 #include <ChRt.h>
-
 #include "Cons.hpp"
 #include "Logger.hpp"
-#include "sevenSegment.h" //preload my header file
+
 #include "Oled.hpp"
 #include "Controller.hpp"
 
@@ -23,7 +22,7 @@ static Oled oled_inst(&controller_inst);
 // Runs the console UI mainly for debugging and later for config
 // Period = 50 ms
 //------------------------------------------------------------------------------
-static unsigned int consoleTaskPriority = 25;
+static unsigned int consoleTaskPriority = 50;
 static THD_WORKING_AREA(waConsoleTask, 2048);
 static THD_FUNCTION(ConsoleTask, arg) {
   (void)arg;
@@ -43,8 +42,8 @@ static THD_FUNCTION(ConsoleTask, arg) {
 // ControllerTask
 //
 // Runs the BMS state machine controlling all usefull activities
-// Period = 1000 ms
-static unsigned int ControllerTaskPriority = 5;
+// Period = 4000 ms
+static unsigned int ControllerTaskPriority = 40;
 //------------------------------------------------------------------------------
 static THD_WORKING_AREA(waControllerTask, 2048);
 static THD_FUNCTION(ControllerTask, arg) {
@@ -53,7 +52,7 @@ static THD_FUNCTION(ControllerTask, arg) {
   systime_t wakeTime = chVTGetSystemTime();
   for (;;) // A Task shall never return or exit.
   {
-    wakeTime += MS2ST(1000);
+    wakeTime += MS2ST(4000);
     chThdSleepUntil(wakeTime);
     controller_inst.doController();
   }
@@ -63,8 +62,8 @@ static THD_FUNCTION(ControllerTask, arg) {
 // OledTask
 //
 // Runs the Oled task that simply prints values on the OLED for prod
-// Period = 900 ms
-static unsigned int OledTaskPriority = 10;
+// Period = 4000 ms
+static unsigned int OledTaskPriority = 30;
 //------------------------------------------------------------------------------
 static THD_WORKING_AREA(waOledTask, 2048);
 static THD_FUNCTION(OledTask, arg) {
@@ -73,7 +72,7 @@ static THD_FUNCTION(OledTask, arg) {
   systime_t wakeTime = chVTGetSystemTime();
   for (;;) // A Task shall never return or exit.
   {
-    wakeTime += MS2ST(900);
+    wakeTime += MS2ST(4000);
     chThdSleepUntil(wakeTime);
     oled_inst.doOled();
   }
@@ -83,8 +82,8 @@ static THD_FUNCTION(OledTask, arg) {
 // DebugTask
 //
 // Runs the debug task that simply prints the unused stack space of each task
-// Period = 2000 ms
-static unsigned int DebugTaskPriority = 3;
+// Period = 10000 ms
+static unsigned int DebugTaskPriority = 20;
 //------------------------------------------------------------------------------
 static THD_WORKING_AREA(waDebugTask, 2048);
 static THD_FUNCTION(DebugTask, arg) {
@@ -99,7 +98,7 @@ static THD_FUNCTION(DebugTask, arg) {
   for (;;) // A Task shall never return or exit.
   {
     // Sleep for one second.
-    wakeTime += MS2ST(2000);
+    wakeTime += MS2ST(10000);
     chThdSleepUntil(wakeTime);
 
     LOG_DEBUG("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));

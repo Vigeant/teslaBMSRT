@@ -39,6 +39,8 @@ class BMSModuleManager
     float getHistHighestCellVolt();
     float getHistHighestPackTemp();
     float getHistHighestCellDiffVolt();
+    bool getIsFaulted();
+    bool getLineFault();
     /*
       void processCANMsg(CAN_FRAME &frame);
     */
@@ -65,6 +67,7 @@ class BMSModuleManager
     int batteryID;
     int numFoundModules;                    // The number of modules that seem to exist
     bool isFaulted;
+    bool lineFault;     //true if we lose comms with modules.
     //int spack;
     /*
       void sendBatterySummary();

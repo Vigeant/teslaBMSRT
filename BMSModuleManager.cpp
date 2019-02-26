@@ -1,6 +1,5 @@
 #include "CONFIG.h"
 #include "BMSModuleManager.hpp"
-//#include "BMSUtil.h"
 #include "Logger.hpp"
 
 //extern EEPROMSettings settings;
@@ -18,7 +17,9 @@ BMSModuleManager::BMSModuleManager()
   histHighestCellVolt = 0.0f;
   histHighestCellDiffVolt = 0.0f;
   isFaulted = false;
+  lineFault = false;
   pstring = 1;
+  pinMode(FAULTLOOP, INPUT_PULLUP);
 }
 
 void BMSModuleManager::resetModuleRecordedValues()
@@ -112,7 +113,6 @@ void BMSModuleManager::renumberBoardIDs()
 void BMSModuleManager::clearFaults()
 {
   int16_t err;
-
   //reset alerts status
   if ((err = BMSDW(BROADCAST_ADDR, REG_ALERT_STATUS, 0xFF)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "reset alerts status");
@@ -132,9 +132,8 @@ void BMSModuleManager::clearFaults()
   if ((err = BMSDW(BROADCAST_ADDR, REG_FAULT_STATUS, 0)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "clear faults status");
   }
-
   //wtf!!!
-  isFaulted = false;
+  //isFaulted = false;
 }
 
 /*
@@ -178,9 +177,14 @@ void BMSModuleManager::wakeBoards()
 void BMSModuleManager::getAllVoltTemp() {
   int16_t err;
   float tempPackVolt = 0.0f;
+  if (lineFault) renumberBoardIDs();
+
   //stop balancing
   if ((err = BMSDW(BROADCAST_ADDR, REG_BAL_CTRL, 0x00)) < 0) {
     BMSD_LOG_ERR(BROADCAST_ADDR, err, "getAllVoltTemp, stop balancing");
+    lineFault = true;
+  } else {
+    lineFault = false;
   }
 
 
@@ -208,18 +212,16 @@ void BMSModuleManager::getAllVoltTemp() {
 
 
 
-  //WTF!!! this does not belong here!!!
-  /*
-    if (digitalRead(11) == LOW) {
-    if (!isFaulted) LOG_ERROR("One or more BMS modules have entered the fault state!\n");
-    isFaulted = true;
+  //LOG_INFO("fault loop read : %b, isFaulted: %b\n", digitalRead(FAULTLOOP), isFaulted);
+  if (digitalRead(FAULTLOOP) == LOW) {
+    if (!isFaulted) {
+      LOG_ERROR("One or more BMS modules have entered the fault state!\n");
     }
-    else
-    {
+    isFaulted = true;
+  } else {
     if (isFaulted) LOG_INFO("All modules have exited a faulted state\n");
     isFaulted = false;
-    }
-  */
+  }
 
   float tempHighCellVolt = 0.0;
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
@@ -235,7 +237,6 @@ void BMSModuleManager::getAllVoltTemp() {
       if (modules[y].getLowCellV() <  tempLowCellVolt)  tempLowCellVolt = modules[y].getLowCellV();
     }
   }
-
   //update cell V watermarks
   if ( tempLowCellVolt < histLowestCellVolt ) histLowestCellVolt =  tempLowCellVolt;
   if ( tempHighCellVolt > histHighestCellVolt ) histHighestCellVolt = tempHighCellVolt;
@@ -244,18 +245,18 @@ void BMSModuleManager::getAllVoltTemp() {
   if ( histHighestCellDiffVolt < tempHCDV ) histHighestCellDiffVolt = tempHCDV;
 
   //save values to objects
-  
+
   lowCellVolt = tempLowCellVolt;
   highCellVolt = tempHighCellVolt;
   packVolt = tempPackVolt;
 
 }
 
-float BMSModuleManager::getHistHighestPackTemp(){
+float BMSModuleManager::getHistHighestPackTemp() {
   return histHighestPackTemp;
 }
 
-float BMSModuleManager::getHistHighestCellDiffVolt(){
+float BMSModuleManager::getHistHighestCellDiffVolt() {
   return histHighestCellDiffVolt;
 }
 
@@ -283,11 +284,11 @@ float BMSModuleManager::getPackVoltage()
   return packVolt;
 }
 
-float BMSModuleManager::getHistLowestCellVolt(){
+float BMSModuleManager::getHistLowestCellVolt() {
   return histLowestCellVolt;
 }
 
-float BMSModuleManager::getHistHighestCellVolt(){
+float BMSModuleManager::getHistHighestCellVolt() {
   return histHighestCellVolt;
 }
 
@@ -328,9 +329,9 @@ float BMSModuleManager::getAvgTemperature()
       break;
     }
   }
-  if (y>0){
+  if (y > 0) {
     return avg / (float)(y);
-  } else{
+  } else {
     return 0;
   }
 }
@@ -389,6 +390,21 @@ float BMSModuleManager::getAvgCellVolt()
 
   return avg;
 }
+
+
+bool BMSModuleManager::getIsFaulted() {
+  return isFaulted;
+}
+bool BMSModuleManager::getLineFault() {
+  return lineFault;
+}
+
+
+
+
+
+
+
 
 void BMSModuleManager::printPackSummary()
 {

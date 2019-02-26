@@ -2,13 +2,38 @@
 
 #include <Arduino.h>
 
+///////////////////////////////////
+// Teensy pin configuration      //
+///////////////////////////////////
+
+//side 1
+//#define SERIAL1_RX        0
+//#define SERIAL1_TX        1
+#define FAULTLOOP             2     //GPIO2
+//#define CAN_TX            3
+//#define CAN_RX            4
+#define OLED_PIN_DC       5
+//#define GPIO6             6
+#define SERIAL3_RX        7
+#define SERIAL3_TX        8
+//#define GPIO9             9     //alternate serial2_rx
+#define OLED_PIN_CS       10    //alternate serial2_tx
+#define OLED_PIN_MOSI     11
+//#define GPIO12            12
+
+//side 2
+#define OLED_PIN_SCK      13    //LED
+#define OLED_PIN_RESET    15
+
+
+
 //Set to the proper port for your USB connection - SerialUSB on Due (Native) or Serial for Due (Programming) or Teensy
 #define SERIALCONSOLE   Serial
 
 
 
 // victron serial VE direct bus config
-#define VE Serial2
+//#define VE Serial2
 
 
 

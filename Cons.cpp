@@ -77,7 +77,7 @@ void Cons::printMenu() {
 
 Cons::Cons() {
   // initialize serial communication at 9600 bits per second:
-  SERIALCONSOLE.begin(9600);
+  SERIALCONSOLE.begin(115200);
 
   /*
     while (!SERIALCONSOLE) {

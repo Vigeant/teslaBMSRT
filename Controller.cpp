@@ -51,7 +51,7 @@ Controller::Controller() {
 //reset all boards and assign address to each board and configure their thresholds
 void Controller::initBMSManager() {
   bms.renumberBoardIDs();
-
+  bms.clearFaults();
 }
 
 void Controller::assertFaultLine() {
