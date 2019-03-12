@@ -19,7 +19,7 @@ BMSModuleManager::BMSModuleManager()
   isFaulted = false;
   lineFault = false;
   pstring = 1;
-  pinMode(FAULTLOOP, INPUT_PULLUP);
+  pinMode(INL_BAT_PACK_FAULT, INPUT_PULLUP);
 }
 
 void BMSModuleManager::resetModuleRecordedValues()
@@ -215,7 +215,7 @@ void BMSModuleManager::getAllVoltTemp() {
 
 
   //LOG_INFO("fault loop read : %b, isFaulted: %b\n", digitalRead(FAULTLOOP), isFaulted);
-  if (digitalRead(FAULTLOOP) == LOW) {
+  if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
     if (!isFaulted) {
       LOG_ERROR("One or more BMS modules have entered the fault state!\n");
     }

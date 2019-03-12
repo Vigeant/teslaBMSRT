@@ -7,38 +7,43 @@
 ///////////////////////////////////
 
 //side 1
-//#define SERIAL1_RX        0
-//#define SERIAL1_TX        1
-#define FAULTLOOP             2     //GPIO2
-//#define CAN_TX            3
-//#define CAN_RX            4
-#define OLED_PIN_DC       5
-//#define GPIO6             6
-#define SERIAL3_RX        7
-#define SERIAL3_TX        8
-//#define GPIO9             9     //alternate serial2_rx
-#define OLED_PIN_CS       10    //alternate serial2_tx
-#define OLED_PIN_MOSI     11
-//#define GPIO12            12
+//#define SERIAL1_RX          0
+//#define SERIAL1_TX          1
+#define OUTL_12V_BAT_CHRG     2   //Drive low to turn the DC2DC converter to charge the 12V battery       
+#define CAN_TX                3
+#define CAN_RX                4
+#define OLED_PIN_DC           5
+//                            6
+#define SERIAL3_RX            7   // from tesla BMS
+#define SERIAL3_TX            8   // to tesla BMS
+//                            9
+#define OLED_PIN_CS           10
+#define OLED_PIN_MOSI         11
+//                            12
 
 //side 2
-#define OLED_PIN_SCK      13    //LED
-#define OLED_PIN_RESET    15
+#define OLED_PIN_SCK          13    //LED
+//                            14
+#define OLED_PIN_RESET        15
+#define INL_BAT_PACK_FAULT    16    //Tesla Battery pack fault.
+#define INL_BAT_MON_FAULT     17    //Battery Monitor Fault.
+#define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconected (from EVCC).
+#define INH_RUN               19    //RUN signal from power relay with voltage devider from 12V to 5V.
+#define INH_MISC              20    //misc discrete with voltage devider from 12V to 5V.
+#define INA_12V_BAT           21    //12v battery monitor. Analog input with 12V to 5V voltage devider.
+#define OUTL_EVCC_ON          22    //drive low to power on EVCC. Cycling this signal will force a new charge cycle.
+#define OUTL_NO_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
+
+//top side
+//short P and G to reset board into program mode using push button
 
 
 
 //Set to the proper port for your USB connection - SerialUSB on Due (Native) or Serial for Due (Programming) or Teensy
 #define SERIALCONSOLE   Serial
 
-
-
-// victron serial VE direct bus config
-//#define VE Serial2
-
-
-
-#define EEPROM_VERSION      0x14    //update any time EEPROM struct below is changed.
-#define EEPROM_PAGE         0
+//#define EEPROM_VERSION      0x14    //update any time EEPROM struct below is changed.
+//#define EEPROM_PAGE         0
 
 
 #define VERSION 1
