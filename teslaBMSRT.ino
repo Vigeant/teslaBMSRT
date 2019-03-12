@@ -1,7 +1,6 @@
 #include <ChRt.h>
 #include "Cons.hpp"
 #include "Logger.hpp"
-
 #include "Oled.hpp"
 #include "Controller.hpp"
 
@@ -12,6 +11,22 @@ static Cons cons_inst;
 static Oled oled_inst(&controller_inst);
 
 
+// a softer sleep_until function that will survive missed deadlines
+uint8_t sleepUntil(systime_t *previous, const systime_t period)
+{
+  systime_t future = *previous + period;
+  chSysLock();
+  systime_t now = chVTGetSystemTime();
+  int mustDelay = now < *previous ?
+    (now < future && future < *previous) :
+    (now < future || future < *previous);
+  if (mustDelay)
+    chThdSleepS(future - now);
+  chSysUnlock();
+  *previous = future;
+  return mustDelay;
+}
+
 
 // define Tasks
 // priority 1 = low, 100 = high
@@ -20,7 +35,7 @@ static Oled oled_inst(&controller_inst);
 // ConsoleTask
 //
 // Runs the console UI mainly for debugging and later for config
-// Period = 50 ms
+// Period = 100 ms
 //------------------------------------------------------------------------------
 static unsigned int consoleTaskPriority = 50;
 static THD_WORKING_AREA(waConsoleTask, 2048);
@@ -28,12 +43,10 @@ static THD_FUNCTION(ConsoleTask, arg) {
   (void)arg;
   cons_inst.printMenu();
   LOG_CONSOLE(">> ");
+  systime_t time = chVTGetSystemTime();
   for (;;)
   {
-    //wakeTime += MS2ST(50);
-    //chThdSleepUntil(wakeTime);
-    chThdSleepMilliseconds(35); // + 15 of the Cons timeout
-    //LOG_CONSOLE("aaa\n");
+    if (!sleepUntil(&time, 100)) {LOG_ERROR("ConsoleTask missed a deadline\n" );}
     cons_inst.doConsole();
   }
 }
@@ -49,11 +62,10 @@ static THD_WORKING_AREA(waControllerTask, 2048);
 static THD_FUNCTION(ControllerTask, arg) {
   (void)arg;
   
-  systime_t wakeTime = chVTGetSystemTime();
-  for (;;) // A Task shall never return or exit.
+  systime_t time = chVTGetSystemTime();
+  for (;;)
   {
-    wakeTime += MS2ST(4000);
-    chThdSleepUntil(wakeTime);
+    if (!sleepUntil(&time, 4000)) {LOG_ERROR("ControllerTask missed a deadline\n");}
     controller_inst.doController();
   }
 }
@@ -69,11 +81,10 @@ static THD_WORKING_AREA(waOledTask, 2048);
 static THD_FUNCTION(OledTask, arg) {
   (void)arg;
   
-  systime_t wakeTime = chVTGetSystemTime();
-  for (;;) // A Task shall never return or exit.
+  systime_t time = chVTGetSystemTime();
+  for (;;)
   {
-    wakeTime += MS2ST(4000);
-    chThdSleepUntil(wakeTime);
+    if (!sleepUntil(&time, 4000)) {LOG_ERROR("OledTask missed a deadline\n");}
     oled_inst.doOled();
   }
 }
@@ -89,17 +100,10 @@ static THD_WORKING_AREA(waDebugTask, 2048);
 static THD_FUNCTION(DebugTask, arg) {
   (void)arg;
   
-  systime_t wakeTime = chVTGetSystemTime();
-  // digital pin 2 has a pushbutton attached to it. Give it a name:
-  //uint8_t pushButton = 2;
-  // make the pushbutton's pin an input:
-  //pinMode(pushButton, INPUT);
-
-  for (;;) // A Task shall never return or exit.
+  systime_t time = chVTGetSystemTime();
+  for (;;)
   {
-    // Sleep for one second.
-    wakeTime += MS2ST(10000);
-    chThdSleepUntil(wakeTime);
+    if (!sleepUntil(&time, 10000)) {LOG_ERROR("OledTask missed a deadline\n");}
 
     LOG_DEBUG("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));
     LOG_DEBUG("OledTask    | unsused stack | %d\n", chUnusedThreadStack(waOledTask, sizeof(waOledTask)));

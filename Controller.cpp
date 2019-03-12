@@ -3,7 +3,7 @@
 //Controller::ControllerState Controller::state;
 
 //------------------------------------------------------------------------------
-// Controller::task()
+// doController
 //
 // Orchestrates the activities within the BMS via a state machine.
 //------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ void Controller::syncModuleDataObjects() {
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
   //TODO balancing disabled here to avoid discharging the batteries.
-  //void balanceCells(1);
+  //void balanceCells(4);
 }
 
 

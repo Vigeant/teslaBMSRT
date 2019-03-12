@@ -47,7 +47,7 @@ void BMSModuleManager::balanceCells(uint8_t duration)
 
         }
       }
-      LOG_DEBUG("module %d - 0x%x\n", modules[y].getAddress(), balance);
+      LOG_DEBUG("balancing module %d - 0x%x\n", modules[y].getAddress(), balance);
       (void) modules[y].balanceCells(balance, duration);
     } else {
       break;
