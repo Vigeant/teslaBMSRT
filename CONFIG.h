@@ -9,13 +9,13 @@
 //side 1
 //#define SERIAL1_RX          0
 //#define SERIAL1_TX          1
-#define OUTL_12V_BAT_CHRG     2   //Drive low to turn the DC2DC converter to charge the 12V battery       
+#define OUTL_12V_BAT_CHRG     2     //Drive low to turn the DC2DC converter to charge the 12V battery       
 #define CAN_TX                3
 #define CAN_RX                4
 #define OLED_PIN_DC           5
 //                            6
-#define SERIAL3_RX            7   // from tesla BMS
-#define SERIAL3_TX            8   // to tesla BMS
+#define SERIAL3_RX            7     // from tesla BMS
+#define SERIAL3_TX            8     // to tesla BMS
 //                            9
 #define OLED_PIN_CS           10
 #define OLED_PIN_MOSI         11
