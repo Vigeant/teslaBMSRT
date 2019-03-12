@@ -14,7 +14,7 @@ static Oled oled_inst(&controller_inst);
 // a softer sleep_until function that will survive missed deadlines
 uint8_t sleepUntil(systime_t *previous, const systime_t period)
 {
-  systime_t future = *previous + period;
+  systime_t future = *previous + MS2ST(period);
   chSysLock();
   systime_t now = chVTGetSystemTime();
   int mustDelay = now < *previous ?

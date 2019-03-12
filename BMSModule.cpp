@@ -143,7 +143,7 @@ bool BMSModule::updateInstanceWithModuleValues()
   if (getLowTemp() < lowestTemperature) lowestTemperature = getLowTemp();
   if (getHighTemp() > highestTemperature) highestTemperature = getHighTemp();
 
-  LOG_DEBUG("Got voltage and temperature readings");
+  LOG_DEBUG("Got voltage and temperature readings\n");
   //return true;
   //LOG_INFO("Module:%d\n",moduleAddress);
   //LOG_INFO("c1V:%f\n",cellVolt[0]);

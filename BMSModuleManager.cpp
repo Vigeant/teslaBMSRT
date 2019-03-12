@@ -192,7 +192,9 @@ void BMSModuleManager::getAllVoltTemp() {
   {
     if (modules[y].getAddress() > 0) {
       //LOG_DEBUG("Module %i exists. Reading voltage and temperature values\n", modules[y].getAddress());
+      
       modules[y].updateInstanceWithModuleValues();
+      
       //LOG_DEBUG("Module voltage: %f\n", modules[y].getModuleVoltage());
       //LOG_DEBUG("Lowest Cell V: %f     Highest Cell V: %f\n", modules[y].getLowCellV(), modules[y].getHighCellV());
       //LOG_DEBUG("Temp1: %f       Temp2: %f\n", modules[y].getTemperature(0), modules[y].getTemperature(1));
