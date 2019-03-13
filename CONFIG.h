@@ -14,8 +14,8 @@
 #define CAN_RX                4
 #define OLED_PIN_DC           5
 //                            6
-#define SERIAL3_RX            7     // from tesla BMS
-#define SERIAL3_TX            8     // to tesla BMS
+#define SERIAL3_RX            7     // from Tesla BMS
+#define SERIAL3_TX            8     // to Tesla BMS
 //                            9
 #define OLED_PIN_CS           10
 #define OLED_PIN_MOSI         11
@@ -27,10 +27,10 @@
 #define OLED_PIN_RESET        15
 #define INL_BAT_PACK_FAULT    16    //Tesla Battery pack fault.
 #define INL_BAT_MON_FAULT     17    //Battery Monitor Fault.
-#define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconected (from EVCC).
-#define INH_RUN               19    //RUN signal from power relay with voltage devider from 12V to 5V.
-#define INH_MISC              20    //misc discrete with voltage devider from 12V to 5V.
-#define INA_12V_BAT           21    //12v battery monitor. Analog input with 12V to 5V voltage devider.
+#define INL_EVSE_DISC         18    //Electric Vehicle Supply Equipment Disconnected (from EVCC).
+#define INH_RUN               19    //RUN signal from power relay with voltage divider from 12V to 5V.
+#define INH_MISC              20    //misc discrete with voltage divider from 12V to 5V.
+#define INA_12V_BAT           21    //12v battery monitor. Analog input with 12V to 5V voltage divider.
 #define OUTL_EVCC_ON          22    //drive low to power on EVCC. Cycling this signal will force a new charge cycle.
 #define OUTL_NO_FAULT         23    //drive low to signal no fault to EVCC. Required for EVCC to charge.
 
@@ -69,3 +69,8 @@
 #define BALANCE_V_SETPOINT 3.9f
 //balance all cells above the lowest cell by this offset (taken from tom debree)
 #define BALANCE_CELL_V_OFFSET 0.04f
+//DC 2 DC 12V battery charging cycle trigger
+#define DC2DC_CYCLE_V_SETPOINT 12f
+//DC 2 DC 12V battery charging cycle time in seconds
+#define DC2DC_CYCLE_TIME_S 3600f
+

@@ -161,8 +161,8 @@ void Oled::printFormat5() {
     case Controller::INIT:
       Oled::printCentre("INIT", 1);
       break;
-    case Controller::IDLE:
-      Oled::printCentre("IDLE", 1);
+    case Controller::STANDBY:
+      Oled::printCentre("STANDBY", 1);
       break;
     case Controller::CHARGING:
       Oled::printCentre("CHARGING", 1);
@@ -194,13 +194,13 @@ void Oled::printFaults() {
   oled.setCursor(col0, 0);        // Set cursor to top-left
   oled.setFontType(1);         // Smallest font
   if (controller_inst_ptr->getBMSPtr()->getIsFaulted()) {
-    oled.print("Fault Detected");
+    oled.print("Pack Fault");
   }
 
 
   oled.setCursor(col0, oled.getLCDHeight() / 2);
   if (controller_inst_ptr->getBMSPtr()->getLineFault()) {
-    oled.print("Ser comms Fault");
+    oled.print("Serial Fault");
   }
 
   oled.display();
