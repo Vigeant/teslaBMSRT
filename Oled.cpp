@@ -56,7 +56,6 @@ Oled::Oled(Controller* cont_inst_ptr) {
   oled.begin();    // Initialize the OLED
   oled.clear(ALL); // Clear the display's internal memory
   oled.display();  // Display what's in the buffer (splashscreen)
-  //delay(1000);     // Delay 1000 ms
   oled.clear(PAGE); // Clear the buffer.
   state = FMT6;
   controller_inst_ptr = cont_inst_ptr;
@@ -294,8 +293,8 @@ void Oled::printCentre(const char* value, int font)
   oled.clear(PAGE);
   oled.setFontType(font);
   // Try to set the cursor in the middle of the screen
-  oled.setCursor(middleX - (oled.getFontWidth() * (strlen(value) / 2)),
-                 middleY - (oled.getFontHeight() / 2));
+  oled.setCursor(middleX - (oled.getFontWidth() * (strlen(value) / 2))-4,
+                 middleY - (oled.getFontHeight() / 2)+3);
   // Print the title:
   oled.print(value);
   oled.display();
