@@ -10,7 +10,6 @@ static Controller controller_inst;
 static Cons cons_inst;
 static Oled oled_inst(&controller_inst);
 
-
 // a softer sleep_until function that will survive missed deadlines
 uint8_t sleepUntil(systime_t *previous, const systime_t period)
 {
@@ -41,12 +40,16 @@ static unsigned int consoleTaskPriority = 50;
 static THD_WORKING_AREA(waConsoleTask, 2048);
 static THD_FUNCTION(ConsoleTask, arg) {
   (void)arg;
+  pinMode(INL_SOFT_RST, INPUT_PULLUP);
   cons_inst.printMenu();
   LOG_CONSOLE(">> ");
   systime_t time = chVTGetSystemTime();
   for (;;)
   {
     if (!sleepUntil(&time, 100)) {LOG_ERROR("ConsoleTask missed a deadline\n" );}
+    if (digitalRead(INL_SOFT_RST) == LOW) {
+      NVIC_SystemReset();
+    }
     cons_inst.doConsole();
   }
 }

@@ -10,41 +10,85 @@
 void Controller::doController() {
   const int stateticks = 1;
   static int ticks = 0;
+
+  //figure out state transition
   switch (state) {
-	  
+
     case INIT:
-      initBMSManager();
-      state = STANDBY;
+      if (ticks >= 1) {
+        ticks = 0;
+        state = STANDBY;
+      }
       break;
-	  
-	  
+
     case STANDBY:
-      standby();
+      if (ticks >= stateticks) {
+        ticks = 0;
+        state = STANDBY_DC2DC;
+      }
+      break;
+
+    case STANDBY_DC2DC:
       if (ticks >= stateticks) {
         ticks = 0;
         state = CHARGING;
       }
       break;
-	  
-	  
+      
     case CHARGING:
-      charging();
+      if (ticks >= stateticks) {
+        ticks = 0;
+        state = CHARGER_CYCLE;
+      }
+      break;
+
+    case CHARGER_CYCLE:
       if (ticks >= stateticks) {
         ticks = 0;
         state = RUN;
       }
       break;
-	  
-	  
+      
     case RUN:
-      run();
       if (ticks >= stateticks) {
         ticks = 0;
         state = STANDBY;
       }
       break;
-	  
-	  
+
+
+    default:
+      break;
+  }
+
+  //execute state
+  switch (state) {
+
+    case INIT:
+      init();
+      break;
+
+    case STANDBY:
+      standby();
+      break;
+
+    case STANDBY_DC2DC:
+      standbyDC2DC();
+      break;
+      
+    case CHARGING:
+      charging();
+      break;
+
+    case CHARGER_CYCLE:
+      cargerCycle();
+      break;
+      
+    case RUN:
+      run();
+      break;
+
+
     default:
       break;
   }
@@ -58,7 +102,16 @@ Controller::Controller() {
 
 //initialization functions
 //reset all boards and assign address to each board and configure their thresholds
-void Controller::initBMSManager() {
+void Controller::init() {
+  pinMode(OUTL_12V_BAT_CHRG, OUTPUT);
+  pinMode(OUTPWM_PUMP, OUTPUT); //PWM use analogWrite(OUTPWM_PUMP, 0-255);
+  pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
+  pinMode(INL_EVSE_DISC, INPUT_PULLUP);
+  pinMode(INH_RUN, INPUT_PULLDOWN);
+  pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
+  pinMode(OUTL_EVCC_ON, OUTPUT);
+  pinMode(OUTL_NO_FAULT, OUTPUT);
+
   bms.renumberBoardIDs();
   bms.clearFaults();
 }
@@ -69,10 +122,6 @@ void Controller::assertFaultLine() {
 
 void Controller::clearFaultLine() {
   //TODO assert fault line
-}
-
-void Controller::cycleCharger() {
-  //TODO cycle charger
 }
 
 //run-time functions
@@ -98,11 +147,11 @@ void Controller::syncModuleDataObjects() {
   }
 
   if (nofault) {
-	clearFaultLine();
+    clearFaultLine();
     bms.clearFaults();
   } else {
-	assertFaultLine();
-    
+    assertFaultLine();
+
   }
 
 }
@@ -120,27 +169,38 @@ void Controller::balanceCells() {
    In that state, it monitors for a voltage change to switch to a new state.
 */
 void Controller::standby() {
-  const int ticksCount = 10;
-  static int ticks = 0;
   syncModuleDataObjects();
+  digitalWrite(OUTL_EVCC_ON, HIGH);
+  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
+}
 
-  //detect if charging
-  if (ticks > ticksCount){
-    
-  }
-  //detect if driving
-  //detect if standby
-
-
+void Controller::standbyDC2DC() {
+  syncModuleDataObjects();
+  digitalWrite(OUTL_EVCC_ON, HIGH);
+  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
 void Controller::charging() {
   syncModuleDataObjects();
+  digitalWrite(OUTL_EVCC_ON, LOW);
+  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
+}
 
+void Controller::cargerCycle() {
+  syncModuleDataObjects();
+  digitalWrite(OUTL_EVCC_ON, HIGH);
+  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
 void Controller::run() {
   syncModuleDataObjects();
+  digitalWrite(OUTL_EVCC_ON, HIGH);
+  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 
 }
 

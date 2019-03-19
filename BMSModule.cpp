@@ -75,7 +75,7 @@ bool BMSModule::updateInstanceWithModuleValues()
     faults = buff[1];
     COVFaults = buff[2];
     CUVFaults = buff[3];
-    LOG_DEBUG("Module %i   alerts=%X   faults=%X   COV=%X   CUV=%X", moduleAddress, alerts, faults, COVFaults, CUVFaults);
+    LOG_DEBUG("Module %i   alerts=%X   faults=%X   COV=%X   CUV=%X\n", moduleAddress, alerts, faults, COVFaults, CUVFaults);
   } else {
     BMSD_LOG_ERR(moduleAddress, err, "Reading Status Registers");
     return false;

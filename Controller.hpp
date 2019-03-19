@@ -9,7 +9,7 @@
 class Controller {
   public:
     enum ControllerState {
-      INIT = 0, STANDBY = 1, CHARGING = 2, RUN = 3
+      INIT = 0, STANDBY = 1, STANDBY_DC2DC = 2, CHARGING = 3, CHARGER_CYCLE = 4, RUN = 5
     };
     void doController();
     Controller();
@@ -20,8 +20,7 @@ class Controller {
 
     BMSModuleManager bms;
 
-    //initialization functions
-    void initBMSManager(); //reset all boards and assign address to each board
+
 
     //run-time functions
     void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
@@ -29,11 +28,14 @@ class Controller {
 
     void assertFaultLine();
     void clearFaultLine();
-    void cycleCharger();
+    
 
     ControllerState state;
+    void init(); //reset all boards and assign address to each board
     void standby();
+    void standbyDC2DC();
     void charging();
+    void cargerCycle();
     void run();
 
 };
