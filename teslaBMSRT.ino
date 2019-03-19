@@ -58,7 +58,7 @@ static THD_FUNCTION(ConsoleTask, arg) {
 // ControllerTask
 //
 // Runs the BMS state machine controlling all usefull activities
-// Period = 4000 ms
+// Period = 500 ms
 static unsigned int ControllerTaskPriority = 40;
 //------------------------------------------------------------------------------
 static THD_WORKING_AREA(waControllerTask, 2048);
@@ -68,7 +68,7 @@ static THD_FUNCTION(ControllerTask, arg) {
   systime_t time = chVTGetSystemTime();
   for (;;)
   {
-    if (!sleepUntil(&time, 4000)) {LOG_ERROR("ControllerTask missed a deadline\n");}
+    if (!sleepUntil(&time, 500)) {LOG_ERROR("ControllerTask missed a deadline\n");}
     controller_inst.doController();
   }
 }
@@ -77,7 +77,7 @@ static THD_FUNCTION(ControllerTask, arg) {
 // OledTask
 //
 // Runs the Oled task that simply prints values on the OLED for prod
-// Period = 4000 ms
+// Period = 1000 ms
 static unsigned int OledTaskPriority = 30;
 //------------------------------------------------------------------------------
 static THD_WORKING_AREA(waOledTask, 2048);
@@ -87,7 +87,7 @@ static THD_FUNCTION(OledTask, arg) {
   systime_t time = chVTGetSystemTime();
   for (;;)
   {
-    if (!sleepUntil(&time, 4000)) {LOG_ERROR("OledTask missed a deadline\n");}
+    if (!sleepUntil(&time, 1000)) {LOG_ERROR("OledTask missed a deadline\n");}
     oled_inst.doOled();
   }
 }
@@ -96,7 +96,7 @@ static THD_FUNCTION(OledTask, arg) {
 // DebugTask
 //
 // Runs the debug task that simply prints the unused stack space of each task
-// Period = 10000 ms
+// Period = 5000 ms
 static unsigned int DebugTaskPriority = 20;
 //------------------------------------------------------------------------------
 static THD_WORKING_AREA(waDebugTask, 2048);
@@ -106,7 +106,7 @@ static THD_FUNCTION(DebugTask, arg) {
   systime_t time = chVTGetSystemTime();
   for (;;)
   {
-    if (!sleepUntil(&time, 10000)) {LOG_ERROR("OledTask missed a deadline\n");}
+    if (!sleepUntil(&time, 5000)) {LOG_ERROR("OledTask missed a deadline\n");}
 
     LOG_DEBUG("DebugTask   | unsused stack | %d\n", chUnusedThreadStack(waDebugTask, sizeof(waDebugTask)));
     LOG_DEBUG("OledTask    | unsused stack | %d\n", chUnusedThreadStack(waOledTask, sizeof(waOledTask)));

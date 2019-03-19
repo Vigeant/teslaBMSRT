@@ -164,11 +164,17 @@ void Oled::printFormat5() {
     case Controller::STANDBY:
       Oled::printCentre("STANDBY", 1);
       break;
+    case Controller::STANDBY_DC2DC:
+      Oled::printCentre("STANDBY_DC2", 1);
+      break;
     case Controller::CHARGING:
       Oled::printCentre("CHARGING", 1);
       break;
+    case Controller::CHARGER_CYCLE:
+      Oled::printCentre("CHARGER_CYC", 1);
+      break;
     case Controller::RUN:
-      Oled::printCentre("DRIVE", 1);
+      Oled::printCentre("RUN", 1);
       break;
     default:
       Oled::printCentre("default", 1);
@@ -207,7 +213,7 @@ void Oled::printFaults() {
 }
 
 void Oled::doOled() {
-  const int stateticks = 1;
+  const int stateticks = 4;
   static int ticks = 0;
   switch (state) {
     case FMT1:
