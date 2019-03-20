@@ -223,8 +223,20 @@ void Controller::syncModuleDataObjects() {
   }
 
   bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
+  //I think this can trigger a hard fault due to the displaying of the float.
+  LOG_DEBUG("before print\n");
   LOG_INFO("bat12vVoltage: %f\n", bat12vVoltage);
-  LOG_INFO("bat12vVoltage: %d\n", analogRead(INA_12V_BAT));
+  LOG_DEBUG("after print\n");
+  //Serial.print("blah blahblah blahblah blahblah blahblah blahblah blahblah blahblah blahblah blahblah blah \n");
+  //String* AAA = new String("blah");
+  //LOG_INFO("bat12vVoltage: %d\n", analogRead(INA_12V_BAT));
+
+  //trigger hardfault
+  //int a = *(int*)0xffffffff;
+  //LOG_INFO("bat12vVoltage: 0x%x\n", a);
+  
+  //int a = 0;
+  //LOG_INFO("bat12vVoltage: %d\n", 8/a);
 
   if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT ) {
     if (!fault12VBatOV) {

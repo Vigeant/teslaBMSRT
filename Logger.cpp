@@ -246,7 +246,7 @@ void Logger::logMessage(const char *format, va_list args) {
         continue;
       }
       if (*format == 'X') {
-        SERIALCONSOLE.print("0x");
+        SERIALCONSOLE.print((const char * )"0x");
         SERIALCONSOLE.print(va_arg( args, int ), HEX);
         continue;
       }
@@ -255,7 +255,7 @@ void Logger::logMessage(const char *format, va_list args) {
         continue;
       }
       if (*format == 'B') {
-        SERIALCONSOLE.print("0b");
+        SERIALCONSOLE.print((const char *)"0b");
         SERIALCONSOLE.print(va_arg( args, int ), BIN);
         continue;
       }
@@ -270,17 +270,17 @@ void Logger::logMessage(const char *format, va_list args) {
       }
       if (*format == 't') {
         if (va_arg( args, int ) == 1) {
-          SERIALCONSOLE.print("T");
+          SERIALCONSOLE.print((const char * )"T");
         } else {
-          SERIALCONSOLE.print("F");
+          SERIALCONSOLE.print((const char * )"F");
         }
         continue;
       }
       if (*format == 'T') {
         if (va_arg( args, int ) == 1) {
-          SERIALCONSOLE.print("TRUE");
+          SERIALCONSOLE.print((const char * )"TRUE");
         } else {
-          SERIALCONSOLE.print("FALSE");
+          SERIALCONSOLE.print((const char * )"FALSE");
         }
         continue;
       }
