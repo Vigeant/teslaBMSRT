@@ -16,10 +16,9 @@ BMSModuleManager::BMSModuleManager()
   histLowestCellVolt = 5.0f;
   histHighestCellVolt = 0.0f;
   histHighestCellDiffVolt = 0.0f;
-  isFaulted = false;
+  //isFaulted = false;
   lineFault = false;
   pstring = 1;
-  pinMode(INL_BAT_PACK_FAULT, INPUT_PULLUP);
 }
 
 void BMSModuleManager::resetModuleRecordedValues()
@@ -212,19 +211,6 @@ void BMSModuleManager::getAllVoltTemp() {
   if (tempPackVolt > histHighestPackVolt) histHighestPackVolt = tempPackVolt;
   if (tempPackVolt < histLowestPackVolt) histLowestPackVolt = tempPackVolt;
 
-
-
-  //LOG_INFO("fault loop read : %b, isFaulted: %b\n", digitalRead(FAULTLOOP), isFaulted);
-  if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
-    if (!isFaulted) {
-      LOG_ERROR("One or more BMS modules have entered the fault state!\n");
-    }
-    isFaulted = true;
-  } else {
-    if (isFaulted) LOG_INFO("All modules have exited a faulted state\n");
-    isFaulted = false;
-  }
-
   float tempHighCellVolt = 0.0;
   for (int y = 0; y < MAX_MODULE_ADDR; y++)
   {
@@ -393,10 +379,10 @@ float BMSModuleManager::getAvgCellVolt()
   return avg;
 }
 
-
+/*
 bool BMSModuleManager::getIsFaulted() {
   return isFaulted;
-}
+}*/
 bool BMSModuleManager::getLineFault() {
   return lineFault;
 }

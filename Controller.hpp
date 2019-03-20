@@ -16,11 +16,24 @@ class Controller {
     ControllerState getState();
     BMSModuleManager* getBMSPtr();
 
+    //faults
+    bool faultModuleLoop;
+    bool faultBatMon;
+    bool faultBMSSerialComms;
+    bool faultBMSOV;
+    bool faultBMSUV;
+    bool faultBMSOT;
+    bool faultBMSUT;
+    bool fault12VBatOV;
+    bool fault12VBatUV;
+
+    bool isFaulted;
+
   private:
 
     BMSModuleManager bms;
 
-
+    bool chargerInhibit;
 
     //run-time functions
     void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances
@@ -28,7 +41,7 @@ class Controller {
 
     void assertFaultLine();
     void clearFaultLine();
-    
+
 
     ControllerState state;
     void init(); //reset all boards and assign address to each board

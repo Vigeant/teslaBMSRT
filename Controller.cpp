@@ -34,7 +34,7 @@ void Controller::doController() {
         state = CHARGING;
       }
       break;
-      
+
     case CHARGING:
       if (ticks >= stateticks) {
         ticks = 0;
@@ -48,7 +48,7 @@ void Controller::doController() {
         state = RUN;
       }
       break;
-      
+
     case RUN:
       if (ticks >= stateticks) {
         ticks = 0;
@@ -75,7 +75,7 @@ void Controller::doController() {
     case STANDBY_DC2DC:
       standbyDC2DC();
       break;
-      
+
     case CHARGING:
       charging();
       break;
@@ -83,7 +83,7 @@ void Controller::doController() {
     case CHARGER_CYCLE:
       cargerCycle();
       break;
-      
+
     case RUN:
       run();
       break;
@@ -105,12 +105,27 @@ Controller::Controller() {
 void Controller::init() {
   pinMode(OUTL_12V_BAT_CHRG, OUTPUT);
   pinMode(OUTPWM_PUMP, OUTPUT); //PWM use analogWrite(OUTPWM_PUMP, 0-255);
+  pinMode(INL_BAT_PACK_FAULT, INPUT_PULLUP);
   pinMode(INL_BAT_MON_FAULT, INPUT_PULLUP);
   pinMode(INL_EVSE_DISC, INPUT_PULLUP);
   pinMode(INH_RUN, INPUT_PULLDOWN);
   pinMode(INA_12V_BAT, INPUT);  // [0-1023] = analogRead(INA_12V_BAT)
   pinMode(OUTL_EVCC_ON, OUTPUT);
   pinMode(OUTL_NO_FAULT, OUTPUT);
+
+  //faults
+  faultModuleLoop = false;
+  faultBatMon = false;
+  faultBMSSerialComms = false;
+  faultBMSOV = false;
+  faultBMSUV = false;
+  faultBMSOT = false;
+  faultBMSUT = false;
+  fault12VBatOV = false;
+  fault12VBatUV = false;
+  isFaulted = false;
+
+  chargerInhibit = false;
 
   bms.renumberBoardIDs();
   bms.clearFaults();
@@ -126,35 +141,100 @@ void Controller::clearFaultLine() {
 
 //run-time functions
 //gathers all the data from the boards and populates the BMSModel
+
 void Controller::syncModuleDataObjects() {
-  bool nofault = true;
+  float bat12vVoltage;
   bms.getAllVoltTemp();
-  if ( bms.getHighCellVolt() > OVER_V_SETPOINT ) {
-    LOG_ERROR("OVER_V_SETPOINT: %fV, highest cell:%fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
-    nofault = false;
-  }
-  if ( bms.getLowCellVolt() < UNDER_V_SETPOINT ) {
-    LOG_ERROR("UNDER_V_SETPOINT: %fV, lowest cell:%fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
-    nofault = false;
-  }
-  if ( bms.getHighTemperature() > OVER_T_SETPOINT ) {
-    LOG_ERROR("OVER_T_SETPOINT: %fV, highest module:%fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
-    nofault = false;
-  }
-  if ( bms.getLowTemperature() < UNDER_T_SETPOINT ) {
-    LOG_ERROR("UNDER_T_SETPOINT: %fV, lowest module:%fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
-    nofault = false;
-  }
 
-  if (nofault) {
-    clearFaultLine();
-    bms.clearFaults();
+  if (bms.getLineFault()){
+    if (!faultBMSSerialComms){
+      LOG_ERROR("Serial communication with battery modules lost!\n");
+    }
+    faultBMSSerialComms = true;
   } else {
-    assertFaultLine();
-
+    if (faultBMSSerialComms) LOG_INFO("Serial communication with battery modules re-established!\n");
+    faultBMSSerialComms = false;
   }
+
+  if (digitalRead(INL_BAT_PACK_FAULT) == LOW) {
+    if (!faultModuleLoop) {
+      LOG_ERROR("One or more BMS modules have asserted the fault loop!\n");
+    }
+    faultModuleLoop = true;
+  } else {
+    if (faultModuleLoop) LOG_INFO("All modules have deasserted the fault loop\n");
+    faultModuleLoop = false;
+  }
+
+  if ( bms.getHighCellVolt() > OVER_V_SETPOINT ) {
+    if (!faultBMSOV) {
+      LOG_ERROR("OVER_V_SETPOINT: %fV, highest cell:%fV\n", OVER_V_SETPOINT, bms.getHighCellVolt());
+    }
+    faultBMSOV = true;
+  } else {
+    if (faultBMSOV) LOG_INFO("All cells are back under OV threshold\n");
+    faultBMSOV = false;
+  }
+
+  if ( bms.getLowCellVolt() < UNDER_V_SETPOINT ) {
+    if (!faultBMSUV) {
+      LOG_ERROR("UNDER_V_SETPOINT: %fV, lowest cell:%fV\n", UNDER_V_SETPOINT, bms.getLowCellVolt());
+    }
+    faultBMSUV = true;
+  } else {
+    if (faultBMSUV) LOG_INFO("All cells are back over UV threshold\n");
+    faultBMSUV = false;
+  }
+
+  if ( bms.getHighTemperature() > OVER_T_SETPOINT ) {
+    if (!faultBMSOT) {
+      LOG_ERROR("OVER_T_SETPOINT: %fV, highest module:%fV\n", UNDER_V_SETPOINT, bms.getHighTemperature());
+    }
+    faultBMSOT = true;
+  } else {
+    if (faultBMSOT) LOG_INFO("All modules are back under the OT threshold\n");
+    faultBMSOT = false;
+  }
+
+  if ( bms.getLowTemperature() < UNDER_T_SETPOINT ) {
+    if (!faultBMSUT) {
+      LOG_ERROR("UNDER_T_SETPOINT: %fV, lowest module:%fV\n", UNDER_T_SETPOINT, bms.getLowTemperature());
+    }
+    faultBMSUT = true;
+  } else {
+    if (faultBMSUT) LOG_INFO("All modules are back over the UT threshold\n");
+    faultBMSUT = false;
+  }
+
+  bat12vVoltage = (float)analogRead(INA_12V_BAT) / BAT12V_SCALING_DIVISOR ;
+  LOG_INFO("bat12vVoltage: %f\n", bat12vVoltage);
+  LOG_INFO("bat12vVoltage: %d\n", analogRead(INA_12V_BAT));
+
+  if ( bat12vVoltage > BAT12V_OVER_V_SETPOINT ) {
+    if (!fault12VBatOV) {
+      LOG_ERROR("12VBAT_OVER_V_SETPOINT: %fV, V:%fV\n", BAT12V_OVER_V_SETPOINT, bat12vVoltage);
+    }
+    fault12VBatOV = true;
+  } else {
+    if (fault12VBatOV) LOG_INFO("12V battery back under the OV threshold\n");
+    fault12VBatOV = false;
+  }
+
+  if ( bat12vVoltage < BAT12V_UNDER_V_SETPOINT ) {
+    if (!fault12VBatUV) {
+      LOG_ERROR("12VBAT_UNDER_V_SETPOINT: %fV, V:%fV\n", BAT12V_UNDER_V_SETPOINT, bat12vVoltage);
+    }
+    fault12VBatUV = true;
+  } else {
+    if (fault12VBatUV) LOG_INFO("12V battery back over the UV threshold\n");
+    fault12VBatUV = false;
+  }
+
+  chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSOT;
+  isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
 
 }
+
 //balances the cells according to thresholds in the CONFIG.h file
 void Controller::balanceCells() {
   //balance for 1 second given that the controller wakes up every second.
@@ -171,35 +251,35 @@ void Controller::balanceCells() {
 void Controller::standby() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, HIGH);
 }
 
 void Controller::standbyDC2DC() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
 void Controller::charging() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, LOW);
-  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
 void Controller::cargerCycle() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 }
 
 void Controller::run() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, LOW);
+  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 
 }

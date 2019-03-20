@@ -193,19 +193,39 @@ void Oled::printESidewinder() {
 
 void Oled::printFaults() {
   const int col0 = 0;
-  //const int col1 = oled.getLCDWidth() / 2;
 
   oled.clear(PAGE);            // Clear the display
   oled.setCursor(col0, 0);        // Set cursor to top-left
   oled.setFontType(1);         // Smallest font
-  if (controller_inst_ptr->getBMSPtr()->getIsFaulted()) {
-    oled.print("Pack Fault");
-  }
-
-
+  oled.print("Fault Codes");
   oled.setCursor(col0, oled.getLCDHeight() / 2);
-  if (controller_inst_ptr->getBMSPtr()->getLineFault()) {
-    oled.print("Serial Fault");
+
+  if (controller_inst_ptr->faultModuleLoop) {
+    oled.print("A");
+  }
+  if (controller_inst_ptr->faultBatMon) {
+    oled.print("B");
+  }
+  if (controller_inst_ptr->faultBMSSerialComms) {
+    oled.print("C");
+  }
+  if (controller_inst_ptr->faultBMSOV) {
+    oled.print("D");
+  }
+  if (controller_inst_ptr->faultBMSUV) {
+    oled.print("E");
+  }
+  if (controller_inst_ptr->faultBMSOT) {
+    oled.print("F");
+  }
+  if (controller_inst_ptr->faultBMSUT) {
+    oled.print("G");
+  }
+  if (controller_inst_ptr->fault12VBatOV) {
+    oled.print("H");
+  }
+  if (controller_inst_ptr->fault12VBatUV) {
+    oled.print("I");
   }
 
   oled.display();
@@ -261,7 +281,7 @@ void Oled::doOled() {
       Oled::printESidewinder();
       if (ticks >= stateticks) {
         ticks = 0;
-        if (controller_inst_ptr->getBMSPtr()->getIsFaulted() || controller_inst_ptr->getBMSPtr()->getLineFault()) {
+        if (controller_inst_ptr->isFaulted) {
           state = FMT8;
         } else {
           state = FMT1;
@@ -293,8 +313,8 @@ void Oled::printCentre(const char* value, int font)
   oled.clear(PAGE);
   oled.setFontType(font);
   // Try to set the cursor in the middle of the screen
-  oled.setCursor(middleX - (oled.getFontWidth() * (strlen(value) / 2))-4,
-                 middleY - (oled.getFontHeight() / 2)+3);
+  oled.setCursor(middleX - (oled.getFontWidth() * (strlen(value) / 2)) - 4,
+                 middleY - (oled.getFontHeight() / 2) + 3);
   // Print the title:
   oled.print(value);
   oled.display();

@@ -73,3 +73,9 @@
 #define DC2DC_CYCLE_V_SETPOINT 12f
 //DC 2 DC 12V battery charging cycle time in seconds
 #define DC2DC_CYCLE_TIME_S 3600f
+//12V battery OV setpoint
+#define BAT12V_OVER_V_SETPOINT 14.0f
+//12V battery UV setpoint
+#define BAT12V_UNDER_V_SETPOINT 10.0f
+//12V battery ADC deviSor 0-1023 -> 0-15V
+#define BAT12V_SCALING_DIVISOR 68.0f
