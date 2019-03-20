@@ -9,8 +9,16 @@
 ## Error codes on teensyView
 
 | code | definition | 
-+------+------------+
-| A    | aaa|
+|:----:|------------|
+| A | Modules Fault Loop |
+| B | Battery Monitor Fault |
+| C | BMS Serial communication Fault |
+| D | BMS Cell Over Voltage Fault |
+| E | BMS Cell Under Voltage Fault |
+| F | BMS Over Temperature Fault |
+| G | BMS Under Temperature Fault |
+| H | BMS 12V Battery Over Voltage Fault |
+| I | BMS 12V Battery Under Voltage Fault |
 	
 ## todo
 - [X] assign all signals to pins
