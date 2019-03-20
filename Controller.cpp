@@ -123,9 +123,25 @@ void Controller::init() {
   faultBMSUT = false;
   fault12VBatOV = false;
   fault12VBatUV = false;
+
+  //sticky faults
+  sFaultModuleLoop = false;
+  sFaultBatMon = false;
+  sFaultBMSSerialComms = false;
+  sFaultBMSOV = false;
+  sFaultBMSUV = false;
+  sFaultBMSOT = false;
+  sFaultBMSUT = false;
+  sFault12VBatOV = false;
+  sFault12VBatUV = false;
+
   isFaulted = false;
+  stickyFaulted = false;
+
+
 
   chargerInhibit = false;
+  powerLimiter = false;
 
   bms.renumberBoardIDs();
   bms.clearFaults();
@@ -146,8 +162,8 @@ void Controller::syncModuleDataObjects() {
   float bat12vVoltage;
   bms.getAllVoltTemp();
 
-  if (bms.getLineFault()){
-    if (!faultBMSSerialComms){
+  if (bms.getLineFault()) {
+    if (!faultBMSSerialComms) {
       LOG_ERROR("Serial communication with battery modules lost!\n");
     }
     faultBMSSerialComms = true;
@@ -231,8 +247,22 @@ void Controller::syncModuleDataObjects() {
   }
 
   chargerInhibit = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSOV || faultBMSOT;
+  powerLimiter = faultModuleLoop || faultBatMon || faultBMSSerialComms || faultBMSUV || faultBMSOT;
   isFaulted =  chargerInhibit || faultBMSUV || faultBMSUT || fault12VBatOV || fault12VBatUV;
 
+  //update stiky faults
+  sFaultModuleLoop |= faultModuleLoop;
+  sFaultBatMon |= faultBatMon;
+  sFaultBMSSerialComms |= faultBMSSerialComms;
+  sFaultBMSOV |= faultBMSOV;
+  sFaultBMSUV |= faultBMSUV;
+  sFaultBMSOT |= faultBMSUV;
+  sFaultBMSUT |= faultBMSUT;
+  sFault12VBatOV |= fault12VBatOV;
+  sFault12VBatUV |= fault12VBatUV;
+
+  stickyFaulted |= isFaulted;
+  bms.clearFaults();
 }
 
 //balances the cells according to thresholds in the CONFIG.h file
@@ -279,7 +309,7 @@ void Controller::cargerCycle() {
 void Controller::run() {
   syncModuleDataObjects();
   digitalWrite(OUTL_EVCC_ON, HIGH);
-  digitalWrite(OUTL_NO_FAULT, chargerInhibit);
+  digitalWrite(OUTL_NO_FAULT, powerLimiter);
   digitalWrite(OUTL_12V_BAT_CHRG, LOW);
 
 }

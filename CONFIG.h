@@ -16,7 +16,7 @@
 #define INL_SOFT_RST          6     // soft reset of the teensy
 #define SERIAL3_RX            7     // from Tesla BMS
 #define SERIAL3_TX            8     // to Tesla BMS
-#define OUTPWM_PUMP           9    // PWM to coolant pump
+#define OUTPWM_PUMP           9     // PWM to coolant pump
 #define OLED_PIN_CS           10
 #define OLED_PIN_MOSI         11
 //                            12
@@ -74,7 +74,7 @@
 //DC 2 DC 12V battery charging cycle time in seconds
 #define DC2DC_CYCLE_TIME_S 3600f
 //12V battery OV setpoint
-#define BAT12V_OVER_V_SETPOINT 14.0f
+#define BAT12V_OVER_V_SETPOINT 14.5f
 //12V battery UV setpoint
 #define BAT12V_UNDER_V_SETPOINT 10.0f
 //12V battery ADC deviSor 0-1023 -> 0-15V

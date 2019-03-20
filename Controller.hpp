@@ -27,13 +27,26 @@ class Controller {
     bool fault12VBatOV;
     bool fault12VBatUV;
 
+    //sticky faults
+    bool sFaultModuleLoop;
+    bool sFaultBatMon;
+    bool sFaultBMSSerialComms;
+    bool sFaultBMSOV;
+    bool sFaultBMSUV;
+    bool sFaultBMSOT;
+    bool sFaultBMSUT;
+    bool sFault12VBatOV;
+    bool sFault12VBatUV;
+
     bool isFaulted;
+    bool stickyFaulted;
 
   private:
 
     BMSModuleManager bms;
 
     bool chargerInhibit;
+    bool powerLimiter;
 
     //run-time functions
     void syncModuleDataObjects(); //gathers all the data from the boards and populates the BMSModel object instances

@@ -25,9 +25,9 @@
 ## todo
 - [X] assign all signals to pins
 - [ ] Implement state machine
-	- [ ] noFault is driven differently from run to charging (run noFault is used to limit output while in charging it is used to prevent charging)
-- [ ] modify formats to display:
-	- [ ] sticky faults format
+	- [X] noFault is driven differently from run to charging (run noFault is used to limit output while in charging it is used to prevent charging)
+- [X] modify formats to display:
+	- [X] sticky faults format
 - [ ] perform schedulability analysis for rate monotonic scheduling
 	- [ ] worst case execution time (wcet)
 	- [ ] worst case blocking time (wcbt)
